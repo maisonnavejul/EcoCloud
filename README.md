@@ -2,7 +2,7 @@
 
 #Github
 cloner le repo :
-git clone https://<PAT>@github.com/username/repo.git
+git clone https://token@github.com/username/repo.git
 
 recuperer le contenu de la branche :
 git pull
