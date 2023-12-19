@@ -14,6 +14,6 @@ Changer de branche :
 - `git switch nombranche`
 
 Changer de branche sans sauvegarder :
-- `git checkout nom_de_la_branche`
+- `git checkout -f nom_de_la_branche`
 
 
