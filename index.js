@@ -10,9 +10,9 @@ app.use(bodyParser.json()); // Pour parser les corps des requêtes en JSON
 const saltRounds = 10; // Ajoutez cette ligne pour définir saltRounds
 
 app.post('/login', (req, res) => {
-  const { usurname, psw } = req.body;
+  const { username, psw } = req.body;
   
-  db.get(`SELECT * FROM utilisateurs WHERE usurname = ?`, [usurname], (err, user) => {
+  db.get(`SELECT * FROM utilisateurs WHERE username = ?`, [username], (err, user) => {
     if (err) {
       console.log('Erreur lors de la récupération de l’utilisateur:', err);
       return res.status(500).json({ is_connected: false, message: "Erreur serveur." });
@@ -42,9 +42,16 @@ app.post('/login', (req, res) => {
     });    
   });
 });
+// app.post('/upload', upload.single('file'), (req, res) => {
+//   // `upload.single('file')` traite un fichier dont le champ dans le formulaire s'appelle 'file'
+//   if (!req.file) {
+//     return res.status(400).send('No file uploaded.');
+//   }
+//   res.send('File uploaded successfully.');
+// });
 
 app.put('/updateUser', (req, res) => {
-  const { email, psw, firstname, lastname, usurname } = req.body;
+  const { email, psw, firstname, lastname, username } = req.body;
 
   // Hacher le mot de passe avant de le mettre à jour dans la base de données, si un nouveau mot de passe est fourni
   if (psw) {
@@ -53,22 +60,22 @@ app.put('/updateUser', (req, res) => {
         console.error('Erreur lors du hachage du mot de passe:', err.message);
         return res.status(500).send("Erreur lors de la mise à jour du mot de passe.");
       }
-      updateUser(email, hash, firstname, lastname, usurname, res);
+      updateUser(email, hash, firstname, lastname, username, res);
     });
   } else {
     // Pas de mise à jour de mot de passe demandée
-    updateUser(email, null, firstname, lastname, usurname, res);
+    updateUser(email, null, firstname, lastname, username, res);
   }
 });
 
-function updateUser(email, hashedPsw, firstname, lastname, usurname, res) {
+function updateUser(email, hashedPsw, firstname, lastname, username, res) {
   let sql = `UPDATE utilisateurs SET 
               email = COALESCE(?,email), 
               psw = COALESCE(?,psw), 
               firstname = COALESCE(?,firstname), 
               lastname = COALESCE(?,lastname) 
-            WHERE usurname = ?`;
-  let params = [email, hashedPsw, firstname, lastname, usurname];
+            WHERE username = ?`;
+  let params = [email, hashedPsw, firstname, lastname, username];
 
   db.run(sql, params, function(err) {
     if (err) {
@@ -76,10 +83,10 @@ function updateUser(email, hashedPsw, firstname, lastname, usurname, res) {
       return res.status(500).send("Erreur lors de la mise à jour de l'utilisateur.");
     }
     if (this.changes > 0) {
-      console.log(`Utilisateur ${usurname} mis à jour.`);
-      res.send(`Utilisateur ${usurname} mis à jour.`);
+      console.log(`Utilisateur ${username} mis à jour.`);
+      res.send(`Utilisateur ${username} mis à jour.`);
     } else {
-      console.log(`Utilisateur ${usurname} non trouvé.`);
+      console.log(`Utilisateur ${username} non trouvé.`);
       res.status(404).send("Utilisateur non trouvé.");
     }
   });
@@ -90,5 +97,5 @@ function updateUser(email, hashedPsw, firstname, lastname, usurname, res) {
 
 const port = 3000; // Utilisez le port de votre choix
 app.listen(port, () => {
-  console.log(`Serveur démarré sur http://localhost:${port}`);
+  console.log(`Serveur démarré sur http://10.224.0.83:${port}`);
 });
