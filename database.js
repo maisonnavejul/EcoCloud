@@ -2,6 +2,9 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
+
+const fs = require('fs');
+
 const saltRounds = 10;
 
 // Connexion à la base de données (le fichier est créé s'il n'existe pas)
@@ -78,17 +81,9 @@ function ajouterUtilisateur({ email, psw, firstname, lastname, username = 'login
     });
   }
   
-  const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-      // Vous pouvez déterminer le répertoire de destination en fonction de la logique de votre application
-      cb(null, 'uploads/');
-    },
-    filename: function(req, file, cb) {
-      // Générer un nom de fichier unique pour éviter les conflits de noms
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-  });
-  
   const upload = multer({ storage: storage });
+
+  
+  
 
   module.exports = { initDB, ajouterUtilisateur };

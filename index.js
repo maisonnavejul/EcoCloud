@@ -5,7 +5,10 @@ const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
 const multer = require('multer');
 const cors = require('cors');
-const upload = multer({ dest: 'uploads/' }); // Dossier de destination pour les fichiers téléversés
+const path = require('path');
+const fs = require('fs');
+
+
 
 const db = new sqlite3.Database('./database.db');
 
@@ -49,12 +52,25 @@ app.post('/login', (req, res) => {
   });
 });
 
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function(req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
-  res.send('File uploaded successfully.');
+  // Ici, vous pourriez également vouloir renvoyer le chemin du fichier ou d'autres informations
+  //res.send('File uploaded successfully: ' + req.file.path);
 });
+
 
 
 app.put('/updateUser', (req, res) => {
@@ -87,14 +103,18 @@ function updateUser(email, hashedPsw, firstname, lastname, username, res) {
   db.run(sql, params, function(err) {
     if (err) {
       console.error('Erreur lors de la mise à jour de l’utilisateur:', err.message);
+      res.json({ message: `Erreur lors de la mise à jour de l'utilisateur ${username}.` });
       return res.status(500).send("Erreur lors de la mise à jour de l'utilisateur.");
     }
     if (this.changes > 0) {
       console.log(`Utilisateur ${username} mis à jour.`);
-      res.send(`Utilisateur ${username} mis à jour.`);
+      //res.send(`Utilisateur ${username} mis à jour.`);
+      res.json({ message: `Utilisateur ${username} mis à jour.` });
+
     } else {
       console.log(`Utilisateur ${username} non trouvé.`);
-      res.status(404).send("Utilisateur non trouvé.");
+      //res.status(404).send("Utilisateur non trouvé.");
+      res.json({ message: `Utilisateur ${username} non trouvé.` });
     }
   });
 }
