@@ -3,14 +3,20 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
+const multer = require('multer');
+const cors = require('cors');
+const upload = multer({ dest: 'uploads/' }); // Dossier de destination pour les fichiers téléversés
+
 const db = new sqlite3.Database('./database.db');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json()); // Pour parser les corps des requêtes en JSON
 const saltRounds = 10; // Ajoutez cette ligne pour définir saltRounds
 
 app.post('/login', (req, res) => {
   const { username, psw } = req.body;
+  console.log(`username: ${username}, psw: ${psw}`);
   
   db.get(`SELECT * FROM utilisateurs WHERE username = ?`, [username], (err, user) => {
     if (err) {
@@ -42,13 +48,14 @@ app.post('/login', (req, res) => {
     });    
   });
 });
-// app.post('/upload', upload.single('file'), (req, res) => {
-//   // `upload.single('file')` traite un fichier dont le champ dans le formulaire s'appelle 'file'
-//   if (!req.file) {
-//     return res.status(400).send('No file uploaded.');
-//   }
-//   res.send('File uploaded successfully.');
-// });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+  res.send('File uploaded successfully.');
+});
+
 
 app.put('/updateUser', (req, res) => {
   const { email, psw, firstname, lastname, username } = req.body;
