@@ -1,54 +1,41 @@
+// Assurez-vous que ces lignes sont dans votre fichier pour initialiser Express et votre base de données
 const express = require('express');
-const { initDB, ajouterUtilisateur } = require('./database');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./database.db');
 
 const app = express();
-const port = 3000;
-
-// Initialisation de la base de données
-initDB();
-
-// Middleware pour parser le corps des requêtes en JSON
-app.use(express.json());
-
-// Route pour l'inscription d'un nouvel utilisateur
-app.post('/signup', (req, res) => {
-  ajouterUtilisateur(req.body, (err, result) => {
-    if (err) {
-      res.status(500).send("Erreur lors de l'inscription de l'utilisateur.");
-      return;
-    }
-    res.send(result);
-  });
-});
+app.use(bodyParser.json()); // Pour parser les corps des requêtes en JSON
 
 app.post('/login', (req, res) => {
-  const { email, psw } = req.body;
+  const { usurname, psw } = req.body;
+  console.log("here")
   
-  db.get(`SELECT * FROM utilisateurs WHERE email = ?`, [email], (err, row) => {
+  db.get(`SELECT * FROM utilisateurs WHERE usurname = ?`, [usurname], (err, user) => {
     if (err) {
-      res.status(500).send("Erreur lors de la récupération de l'utilisateur.");
-      return;
+      return res.status(500).send("Erreur serveur.");
     }
-    if (row) {
-      bcrypt.compare(psw, row.psw, (err, result) => {
-        if (result) {
-          res.send({ message: "Connexion réussie!" });
-        } else {
-          res.status(401).send({ message: "Mot de passe incorrect!" });
-        }
-      });
-    } else {
-      res.status(404).send({ message: "Utilisateur non trouvé." });
+    if (!user) {
+      return res.status(404).send("Utilisateur non trouvé.");
     }
+    bcrypt.compare(psw, user.psw, (err, result) => {
+      if (err) {
+        console.log('Erreur lors de la comparaison des mots de passe:', err);
+        return res.status(500).send("Erreur serveur.");
+      }
+      if (result) {
+        console.log("Connexion réussie!");
+        res.send("Connexion réussie!");
+      } else {
+        console.log("Mot de passe incorrect.");
+        res.status(401).send("Mot de passe incorrect.");
+      }
+    });    
   });
 });
 
-// Route d'accueil
-app.get('/', (req, res) => {
-  res.send('Bonjour depuis ExpressJS!');
-});
-
-// Démarrage du serveur
+const port = 3000; // Utilisez le port de votre choix
 app.listen(port, () => {
-  console.log(`L'application écoute sur le port ${port}`);
+  console.log(`Serveur démarré sur http://localhost:${port}`);
 });
