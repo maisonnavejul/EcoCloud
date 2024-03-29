@@ -1,51 +1,87 @@
 <template>
   <div>
-    <input type="file" id="fileUpload" multiple />
-    <button @click="pauseUpload">Pause</button>
-    <button @click="resumeUpload">Reprendre</button>
+<!-- Bouton pour envoyer des fichiers -->
+<input type="file" id="fileUpload" multiple @change="event => handleFiles(false, event)" />
+<button @click="pauseUpload">Pause</button>
+<button @click="resumeUpload">Reprendre</button>
+
+<!-- Bouton pour envoyer des dossiers -->
+<input type="file" id="folderUpload" webkitdirectory directory multiple @change="event => handleFiles(true, event)" />
+
   </div>
 </template>
 
 <script>
 import Resumable from 'resumablejs';
+import JSZip from 'jszip';
 
 export default {
   data() {
     return {
       resumable: null,
+      zip: new JSZip(),
     };
   },
-  mounted() {
-    this.resumable = new Resumable({
-      target: 'http://localhost:3000/upload',
-      chunkSize: 1 * 1024 * 1024, // Ajustez la taille des chunks selon vos besoins
-      testChunks: false,
-      throttleProgressCallbacks: 1,
-      simultaneousUploads: 4, // Ajustez pour des téléversements simultanés
-      fileTypeErrorCallback: function(file) { // Supprimez `errorCount`
-        alert(file.fileName + ' a une extension non supportée.');
-      },
-      maxFileSizeErrorCallback: function(file) { // Supprimez `errorCount`
-        alert(file.fileName + ' est trop volumineux.');
-      }
-    });
-
-    this.resumable.assignBrowse(document.getElementById('fileUpload'), true);
-
-    this.resumable.on('fileAdded', (file) => {
-      console.log('Ajout de fichier :', file.fileName);
-      this.resumable.upload();
-    });
-
-    this.resumable.on('fileSuccess', (file) => {
-      console.log('Succès de téléversement pour', file.fileName);
-    });
-
-    this.resumable.on('fileError', (file) => {
-      console.error('Erreur de téléversement pour', file.fileName);
-    });
-  },
   methods: {
+    handleFiles(isDirectory, event) {
+  const files = event.target.files;
+  if (files.length) {
+    let folderName = "archive"; // Nom par défaut si aucun nom de dossier n'est détecté
+
+    if (isDirectory) {
+      // Extraire le nom du dossier à partir du webkitRelativePath du premier fichier
+      const relativePath = files[0].webkitRelativePath;
+      const firstSlashIndex = relativePath.indexOf('/');
+      if (firstSlashIndex !== -1) {
+        folderName = relativePath.substring(0, firstSlashIndex);
+      }
+
+      // Traitement spécifique pour les dossiers
+      Array.from(files).forEach((file) => {
+        this.zip.file(file.webkitRelativePath || file.name, file);
+      });
+
+      // Générer le contenu ZIP et convertir en File
+      this.zip.generateAsync({type: "blob"}).then((content) => {
+        const zipFile = new File([content], `${folderName}.zip`, {type: "application/zip"});
+        this.setUpResumable();
+        this.resumable.addFile(zipFile); // Ajouter directement le fichier ZIP
+      });
+
+    } else {
+      // Traitement pour les fichiers individuels
+      Array.from(files).forEach((file) => {
+        this.setUpResumable();
+        this.resumable.addFile(file);
+      });
+    }
+  }
+}
+,
+    setUpResumable() {
+      if (!this.resumable) {
+        this.resumable = new Resumable({
+          target: 'http://localhost:3000/upload',
+          chunkSize: 1 * 1024 * 1024,
+          testChunks: false,
+          throttleProgressCallbacks: 1,
+          simultaneousUploads: 4,
+        });
+
+        this.resumable.on('fileAdded', (file) => {
+          console.log('Ajout de fichier :', file.fileName || file.name);
+          this.resumable.upload();
+        });
+
+        this.resumable.on('fileSuccess', (file) => {
+          console.log('Succès de téléversement pour', file.fileName || file.name);
+        });
+
+        this.resumable.on('fileError', (file) => {
+          console.error('Erreur de téléversement pour', file.fileName || file.name);
+        });
+      }
+    },
     pauseUpload() {
       this.resumable.pause();
     },
