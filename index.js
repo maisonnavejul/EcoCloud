@@ -16,6 +16,28 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json()); // Pour parser les corps des requêtes en JSON
 const saltRounds = 10; // Ajoutez cette ligne pour définir saltRounds
+const SftpClient = require('ssh2-sftp-client');
+
+async function uploadFileToSFTP(remoteFilePath, localFilePath) {
+  const client = new SftpClient();
+  try {
+    await client.connect({
+      host: "207.180.204.159", // L'adresse IP de votre serveur SFTP
+      port: 22, // Port par défaut pour SFTP
+      username: "EcoCloud", // Votre nom d'utilisateur SFTP
+      password: "EcoCloud" // Le mot de passe de l'utilisateur SFTP
+    });
+    await client.put(localFilePath, remoteFilePath); // Utilisez put au lieu de uploadFrom
+    console.log("Fichier téléversé avec succès via SFTP");
+  } catch (error) {
+    console.error("Erreur lors du téléversement du fichier via SFTP:", error);
+  } finally {
+    client.end();
+  }
+}
+
+
+
 
 app.post('/login', (req, res) => {
   const { username, psw } = req.body;
@@ -71,6 +93,83 @@ app.post('/upload', upload.single('file'), (req, res) => {
   //res.send('File uploaded successfully: ' + req.file.path);
 });
 
+app.post('/uploadsFTP', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('Aucun fichier téléversé.');
+  }
+  const localFilePath = req.file.path;
+  const remoteFilePath = `/files/${req.file.originalname}`;
+
+  uploadFileToSFTP(remoteFilePath, localFilePath)
+    .then(() => {
+      res.send("Fichier téléversé avec succès via SFTP.");
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).send("Erreur lors du téléversement du fichier via SFTP.");
+    });
+});
+
+
+app.get('/files', async (req, res) => {
+  console.log("Récupération de la liste des fichiers...");
+
+  // Chemin local où vous souhaitez stocker les fichiers téléchargés
+  const localDirectoryPath = path.join(__dirname, 'SFTPfiles');
+
+  try {
+    // Lire le contenu du répertoire sur le serveur SFTP de manière asynchrone
+    const remoteDirectoryPath = '/files'; // Chemin du répertoire sur le serveur SFTP
+    const files = await getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath);
+
+    // Envoyer la liste des fichiers au client
+    res.json({ files });
+  } catch (err) {
+    // Gérer les erreurs de récupération des fichiers
+    console.error('Erreur lors de la récupération des fichiers:', err);
+    res.status(500).send("Erreur lors de la récupération de la liste des fichiers.");
+  }
+});
+
+async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
+  // Vérifiez si le dossier local existe, sinon créez-le
+  if (!fs.existsSync(localDirectoryPath)) {
+    fs.mkdirSync(localDirectoryPath, { recursive: true });
+    console.log(`Dossier ${localDirectoryPath} créé.`);
+  }
+
+  const client = new SftpClient();
+  try {
+    await client.connect({
+      host: "207.180.204.159",
+      port: 22,
+      username: "EcoCloud",
+      password: "EcoCloud"
+    });
+
+    const files = await client.list(remoteDirectoryPath);
+    for (const file of files) {
+      console.log(file.name);
+      const localFilePath = path.join(localDirectoryPath, file.name);
+
+      // Vérifiez si le fichier existe déjà dans le répertoire local
+      if (!fs.existsSync(localFilePath)) {
+        // Le fichier n'existe pas, donc on le télécharge
+        await client.get(`${remoteDirectoryPath}/${file.name}`, localFilePath);
+        console.log(`Fichier ${file.name} téléchargé avec succès.`);
+      } else {
+        // Le fichier existe déjà, pas besoin de le télécharger
+        console.log(`Fichier ${file.name} existe déjà, téléchargement sauté.`);
+      }
+    }
+    
+  } catch (error) {
+    console.error(`Erreur lors de la récupération des fichiers depuis SFTP: ${error.message}`);
+    throw error;
+  } finally {
+    client.end();
+  }
+}
 
 
 app.put('/updateUser', (req, res) => {
@@ -90,6 +189,8 @@ app.put('/updateUser', (req, res) => {
     updateUser(email, null, firstname, lastname, username, res);
   }
 });
+
+
 
 function updateUser(email, hashedPsw, firstname, lastname, username, res) {
   let sql = `UPDATE utilisateurs SET 
@@ -118,9 +219,6 @@ function updateUser(email, hashedPsw, firstname, lastname, username, res) {
     }
   });
 }
-
-
-
 
 const port = 3000; // Utilisez le port de votre choix
 app.listen(port, () => {
