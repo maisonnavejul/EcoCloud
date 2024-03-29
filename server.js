@@ -19,9 +19,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Route pour le téléversement de fichier
 app.post('/upload', upload.single('file'), (req, res) => {
-  console.log('Fichier reçu:', req.file);
-  res.send('Fichier téléversé avec succès');
+    console.log('Fichier reçu et sauvegardé:', req.file.path);
+    res.send('Fichier téléversé avec succès');
 });
 
 app.listen(3000, () => {
