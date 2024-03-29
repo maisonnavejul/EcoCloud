@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+*node_modules*
 .DS_Store
 dist
 dist-ssr
@@ -28,3 +28,10 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# .env
+*.env*
+
+# test folders
+*test_files
+*test_files*
