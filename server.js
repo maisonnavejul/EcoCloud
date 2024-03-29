@@ -1,0 +1,29 @@
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
+const app = express();
+
+app.use(cors());
+
+// Configuration de Multer pour utiliser diskStorage
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/') // Chemin du dossier où les fichiers seront sauvegardés
+  },
+  filename: function(req, file, cb) {
+    // Génère le nom du fichier en conservant l'extension originale
+    cb(null, file.originalname)
+  }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  console.log('Fichier reçu:', req.file);
+  res.send('Fichier téléversé avec succès');
+});
+
+app.listen(3000, () => {
+  console.log('Serveur démarré sur http://localhost:3000');
+});
