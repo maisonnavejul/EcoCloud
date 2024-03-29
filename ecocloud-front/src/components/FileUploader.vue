@@ -1,8 +1,8 @@
 <template>
   <div>
-    <input type="file" id="fileUpload" />
+    <input type="file" id="fileUpload" multiple />
     <button @click="pauseUpload">Pause</button>
-    <button @click="resumeUpload">Resume</button>
+    <button @click="resumeUpload">Reprendre</button>
   </div>
 </template>
 
@@ -17,30 +17,33 @@ export default {
   },
   mounted() {
     this.resumable = new Resumable({
-      target: 'http://localhost:3000/upload', // Assurez-vous de remplacer par votre propre endpoint serveur
-      chunkSize: 1 * 1024 * 1024, // 1MB
+      target: 'http://localhost:3000/upload',
+      chunkSize: 1 * 1024 * 1024, // Ajustez la taille des chunks selon vos besoins
       testChunks: false,
       throttleProgressCallbacks: 1,
+      simultaneousUploads: 4, // Ajustez pour des téléversements simultanés
+      fileTypeErrorCallback: function(file) { // Supprimez `errorCount`
+        alert(file.fileName + ' a une extension non supportée.');
+      },
+      maxFileSizeErrorCallback: function(file) { // Supprimez `errorCount`
+        alert(file.fileName + ' est trop volumineux.');
+      }
     });
 
-    if (this.resumable.support) {
-      this.resumable.assignBrowse(document.getElementById('fileUpload'));
+    this.resumable.assignBrowse(document.getElementById('fileUpload'), true);
 
-this.resumable.on('fileAdded', () => {
-  this.resumable.upload();
-});
+    this.resumable.on('fileAdded', (file) => {
+      console.log('Ajout de fichier :', file.fileName);
+      this.resumable.upload();
+    });
 
+    this.resumable.on('fileSuccess', (file) => {
+      console.log('Succès de téléversement pour', file.fileName);
+    });
 
-      this.resumable.on('fileSuccess', (file, message) => {
-        console.log('File success', file, message);
-      });
-
-      this.resumable.on('fileError', (file, message) => {
-        console.error('File error', file, message);
-      });
-    } else {
-      console.error("Votre navigateur ne supporte pas l'API File nécessaire pour utiliser Resumable.js");
-    }
+    this.resumable.on('fileError', (file) => {
+      console.error('Erreur de téléversement pour', file.fileName);
+    });
   },
   methods: {
     pauseUpload() {
@@ -48,7 +51,7 @@ this.resumable.on('fileAdded', () => {
     },
     resumeUpload() {
       this.resumable.upload();
-    }
-  }
-}
+    },
+  },
+};
 </script>
