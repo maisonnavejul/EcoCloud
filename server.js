@@ -9,7 +9,7 @@ app.use(cors());
 // Configuration de Multer pour utiliser diskStorage
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, '/home/EcoCloud/files') 
+    cb(null, '/home/EcoCloud/Data') 
   },
   filename: function(req, file, cb) {
     // Génère le nom du fichier en conservant l'extension originale
