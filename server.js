@@ -25,6 +25,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
     res.send('Fichier téléversé avec succès');
 });
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://localhost:3000');
 });
+
