@@ -222,5 +222,5 @@ function updateUser(email, hashedPsw, firstname, lastname, username, res) {
 
 const port = 3000; // Utilisez le port de votre choix
 app.listen(port, () => {
-  console.log(`Serveur démarré sur http://10.224.0.83:${port}`);
+  console.log(`Serveur démarré sur http://localhost:${port}`);
 });
