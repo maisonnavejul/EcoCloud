@@ -9,7 +9,7 @@ app.use(cors());
 // Configuration de Multer pour utiliser diskStorage
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, 'uploads/') // Chemin du dossier où les fichiers seront sauvegardés
+    cb(null, '/home/EcoCloud/files') 
   },
   filename: function(req, file, cb) {
     // Génère le nom du fichier en conservant l'extension originale
@@ -31,6 +31,6 @@ app.get('/status', (req, res) => {
 });
 
 app.listen(3000, '0.0.0.0', () => {
-  console.log('Serveur démarré sur http://localhost:3000');
+  console.log('Serveur démarré sur http://207.180.204.159:3000');
 });
 
