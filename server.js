@@ -49,6 +49,8 @@ app.post('/upload', (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Serveur démarré sur le port 3000');
+
+app.listen(3000, '0.0.0.0', () => {
+  console.log('Serveur démarré sur http://207.180.204.159:3000');
 });
+
