@@ -53,10 +53,32 @@ export default {
 
         view_file() {
             // const path = `${this.path}/${this.name}`;
-            const path = '../../../test_files/lab5/Grp2_6_Path_Traversal.pdf'
+            const path = `${this.path}/${this.name}`
             window.open(path, '_blank');
-            console.log('View File');
         }
     }
 }
 </script>
+
+<style>
+.file_viewer_itm {
+    margin-bottom: 5%;
+    min-height: 50px;
+    height: 15%;
+    width: 100%;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+.file_itm_checkbox {
+    width: 5%;
+}
+
+.file_itm_type {
+    width: 15%;
+}
+
+.file_itm_name {
+    width: 80%;
+}
+
+</style>

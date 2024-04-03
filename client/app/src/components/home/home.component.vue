@@ -1,19 +1,22 @@
 <template>
     <div class="home">
-        <Toolbar />
+        <Toolbar @openFileUploaderModal="is_uploader_mod_open=true"/>
         <FileViewer />
+        <FileUploaderModal v-if="is_uploader_mod_open" @close="is_uploader_mod_open=false"/>
     </div>
 </template>
 
 <script>
 import Toolbar from '../toolbar/toolbar.component.vue';
 import FileViewer from '../file_viewer/file_viewer.component.vue';
+import FileUploaderModal from '../file_uploader/modal.component.vue';
 
 export default {
     name: 'Home',
     components: {
         Toolbar,
-        FileViewer
+        FileViewer,
+        FileUploaderModal
     },
 
     computed: {
@@ -24,6 +27,7 @@ export default {
 
     data() {
         return {
+            is_uploader_mod_open: false
         }
     },
 

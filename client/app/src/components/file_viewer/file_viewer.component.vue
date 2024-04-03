@@ -2,15 +2,16 @@
     <table class="file_viewer">
         <thead>
             <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Type</th>
+                <th class="head_checkbox"></th>
+                <th class="head_type">Type</th>
+                <th class="head_name">Name</th>
             </tr>
         </thead>
         <tbody>
             <FileViewerItem v-for="file in files" 
                             :name="file.name" 
-                            :type="file.type" 
+                            :type="file.type"
+                            :path="this.path" 
                             :key="file.name"/>
         </tbody>
     </table>
@@ -19,28 +20,26 @@
 <script>
 import FileViewerItem from './file_viewer_itm.component.vue';
 
-import get_dirs_files from '../../scripts/helpers.js';
-
 const tmp_files = [
     {
-        name: 'File 1',
+        name: 'Grp2_6_fix_Path_traversal.patch',
         type: 'file'
     },
     {
-        name: 'File 2',
+        name: 'Grp2_6_Path_traversal.pdf',
         type: 'file'
     },
     {
-        name: 'File 3',
+        name: 'GRP2_7_Faille_XSS.docx',
+        type: 'file'
+    },
+    {
+        name: 'Folder 1',
         type: 'folder'
     },
     {
-        name: 'File 4',
+        name: 'Folder 2',
         type: 'folder'
-    },
-    {
-        name: 'File 5',
-        type: 'file'
     },
 ];
 
@@ -51,20 +50,46 @@ export default {
     },
     data() {
         return {
-            files: null
+            files: null,
+            path: '../../../test_files/lab5/'
         }
     },
 
     methods: {
-        async get_files() {
-            const path = 'C:\\disque\\01-ISEN\\M1\\project\\EcoCloud\\client\\app\\test_files\\lab5';
-            return await get_dirs_files(path);
+        get_files() {
+            this.files = tmp_files;
         }
     },
 
     mounted() {
-        this.files = this.get_files();
+        this.get_files();
         console.log(this.files);
     }
 }
 </script>
+
+<style>
+.file_viewer {
+    width: 100%;
+    padding: 50px 20px;
+}
+
+.file_viewer > thead {
+    text-align: left;
+}
+.file_viewer > tbody {
+    width: 100%;
+}
+
+.head_checkbox {
+    width: 5%;
+}
+
+.head_type {
+    width: 20%;
+}
+
+.head_name {
+    width: 80%;
+}
+</style>

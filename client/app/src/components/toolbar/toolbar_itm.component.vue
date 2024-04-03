@@ -1,6 +1,6 @@
 <template>
     <div class="toolbar_itm">
-        <button @click="execute" class="toolbar_itm_button">{{ name }}</button>
+        <button @click="execute" class="toolbar_itm_button" v-bind:class="class">{{ name }}</button>
     </div>
 </template>
 
@@ -14,11 +14,15 @@ export default {
     props: {
         callback: {
             type: Function,
-            required: false
+            required: false,
         },
         name: {
             type: String,
-            required: true
+            required: true,
+        },
+        class: {
+            type: String,
+            required: false,
         }
     },
 
@@ -34,3 +38,18 @@ export default {
     }
 }
 </script>
+
+<style>
+.toolbar_itm {
+    height: 100%;
+    width: 100%;
+}
+
+.toolbar_itm > button {
+    border-radius: 10px;
+    border: 1px solid #d9d9d9;
+    height: 26px;
+    width: 100px;
+    font-size: 14px;
+}
+</style>

@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import './assets/css/reset.css';
 // Import Components
 import Header from './components/header/header.component.vue';
 
@@ -29,4 +30,19 @@ export default {
 
 
 <style>
+html, #app, .ecocloud {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #f3f1f5;
+  color: #303030;
+  font-family: -apple-system, BlinkMacSystemFont, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  width: 100%;
+  height: 100%;
+}
+
 </style>

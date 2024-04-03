@@ -3,6 +3,7 @@
         <ToolbarItem v-for="item in toolbar_items" 
                         :name="item.name" 
                         :callback="item.callback" 
+                        :class="item.class"
                         :key="item.name"/>
     </div>
 </template>
@@ -19,20 +20,24 @@ export default {
         return {
             toolbar_items: [
                 {
+                    name: 'Upload',
+                    callback: this.upload,
+                    class: 'file_uploader_btn',
+                },
+                {
                     name: 'Add File',
                     callback: this.add_file,
+                    class: 'file_adder',
                 },
                 {
                     name: 'Add Folder',
                     callback: this.add_folder,
-                },
-                {
-                    name: 'Upload',
-                    callback: this.upload,
+                    class: '',
                 },
                 {
                     name: 'Refresh',
                     callback: this.refresh,
+                    class: '',
                 },
             ]
         }
@@ -40,13 +45,13 @@ export default {
 
     methods: {
         add_file() {
-            console.log('Add File');
+            console.log('Add File')
         },
         add_folder() {
             console.log('Add Folder');
         },
         upload() {
-            console.log('Upload');
+            this.$emit('openFileUploaderModal');
         },
         refresh() {
             console.log('Refresh');
@@ -54,3 +59,17 @@ export default {
     },
 }
 </script>
+
+<style>
+.toolbar {
+    display: flex;
+    flex-direction: row;
+    width: 430px;
+    margin-bottom: 20px;
+}
+
+.file_uploader_btn {
+    background-color: #335145;
+    color: white; 
+}
+</style>
