@@ -72,7 +72,7 @@ this.zip.generateAsync({ type: "blob" }).then((content) => {
       if (!this.resumable) {
         this.resumable = new Resumable({
           target: 'http://207.180.204.159:3000/upload',
-          chunkSize: 1 * 1024 * 1024,
+          chunkSize: 2 * 1024 * 1024,
           testChunks: false,
           throttleProgressCallbacks: 1,
           simultaneousUploads: 4,
