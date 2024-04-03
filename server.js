@@ -1,28 +1,33 @@
 const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const DATA_DIR = '/home/EcoCloud/Data';
 const TEMP_DIR = path.join(DATA_DIR, 'temp');
 
-// Assurez-vous que les répertoires existent
 fs.ensureDirSync(DATA_DIR);
 fs.ensureDirSync(TEMP_DIR);
 
-app.post('/upload', async (req, res) => {
-    const { resumableIdentifier, resumableFilename, resumableChunkNumber, resumableTotalChunks } = req.body;
-    const tempChunkPath = path.join(TEMP_DIR, `${resumableIdentifier}-${resumableChunkNumber}`);
-    const fileBuffer = Buffer.from(Object.values(req.body.file)); // Assumant que le fichier est envoyé dans le champ `file`
+app.post('/upload', express.raw({ type: 'application/octet-stream', limit: '50mb' }), async (req, res) => {
+    const resumableIdentifier = req.headers['resumable-identifier'];
+    const resumableFilename = req.headers['resumable-filename'];
+    const resumableChunkNumber = req.headers['resumable-chunk-number'];
+    const resumableTotalChunks = req.headers['resumable-total-chunks'];
 
+    if (!resumableIdentifier || !resumableFilename || !resumableChunkNumber || !resumableTotalChunks) {
+        return res.status(400).send('Missing headers');
+    }
+
+    const tempChunkPath = path.join(TEMP_DIR, `${resumableIdentifier}-${resumableChunkNumber}`);
+    
     // Sauvegarder le fragment temporairement
-    await fs.writeFile(tempChunkPath, fileBuffer);
+    await fs.writeFile(tempChunkPath, req.body);
 
     // Vérifier si tous les fragments ont été reçus
     if (await checkIfAllChunksReceived(resumableIdentifier, resumableTotalChunks)) {
@@ -34,14 +39,11 @@ app.post('/upload', async (req, res) => {
     }
 });
 
-app.listen(3000, '0.0.0.0', () => {
-  console.log('Serveur démarré sur http://207.180.204.159:3000');
-});
 
 async function checkIfAllChunksReceived(identifier, totalChunks) {
     const chunks = await fs.readdir(TEMP_DIR);
     const filteredChunks = chunks.filter(chunk => chunk.startsWith(identifier));
-    return filteredChunks.length === parseInt(totalChunks);
+    return filteredChunks.length === parseInt(totalChunks, 10);
 }
 
 async function reassembleFile(identifier, totalChunks, finalFilePath) {
@@ -52,10 +54,11 @@ async function reassembleFile(identifier, totalChunks, finalFilePath) {
         const chunk = await fs.readFile(chunkPath);
 
         writeStream.write(chunk);
-        await fs.remove(chunkPath); // Supprimer le fragment après l'avoir ajouté
+        await fs.remove(chunkPath);
     }
 
     writeStream.end();
 }
-
-
+app.listen(3000, '0.0.0.0', () => {
+  console.log('Serveur démarré sur http://207.180.204.159:3000');
+});
