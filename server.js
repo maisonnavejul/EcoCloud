@@ -98,15 +98,22 @@ app.get('/files', async (req, res) => {
     }
   });
 
-app.get('/test-recup', async (req, res) => {
+  app.get('/test-recup', async (req, res) => {
+    const folderPath = req.query.path || ''; // Récupère le chemin depuis la requête ou utilise une chaîne vide par défaut
+    
     try {
-      const response = await axios.get('https://b0b6-37-167-148-18.ngrok-free.app/list-files');
-      res.json(response.data); // Envoie les données JSON récupérées en réponse
+      // Remplacez l'URL par celle de votre serveur EcoCloud ou de l'API que vous souhaitez interroger
+      const ecoCloudUrl = `https://b0b6-37-167-148-18.ngrok-free.app/list-files?path=${encodeURIComponent(folderPath)}`;
+      const response = await axios.get(ecoCloudUrl);
+      
+      // Redirige la réponse de l'API directement au client
+      res.json(response.data);
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error);
       res.status(500).send('Erreur lors de la récupération des données');
     }
   });
+
 
 app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://207.180.204.159:3000');
