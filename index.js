@@ -105,29 +105,44 @@ async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
   }
 }
 
+
+// Route pour lister les fichiers et dossiers
+const ROOT_DIR = path.join(__dirname, 'SFTPfiles'); // Chemin absolu vers le dossier SFTPfiles
+
+const getFileDetails = (filePath) => {
+  const stats = fs.statSync(filePath);
+  return {
+      size: stats.size, // Taille en octets
+      createdAt: stats.birthtime // Date de création
+  };
+};
+
 app.get('/list-files', async (req, res) => {
-  const directoryPath = path.join(__dirname, 'SFTPfiles');
+  const reqPath = req.query.path || '';
+  const directoryPath = path.join(ROOT_DIR, reqPath);
 
-  try {
-    const files = await fs.promises.readdir(directoryPath); // Utilisation de fs.promises.readdir() pour lire le répertoire de manière asynchrone
-    const filesDetails = await Promise.all(files.map(async (file) => {
-      const filePath = path.join(directoryPath, file);
-      const fileStats = await fs.promises.stat(filePath); // Utilisation de fs.promises.stat() pour obtenir les informations sur le fichier de manière asynchrone
+  fs.readdir(directoryPath, { withFileTypes: true }, (error, entries) => {
+      if (error) {
+          console.error('Erreur lors de la récupération des fichiers:', error);
+          return res.status(500).send('Erreur lors de la récupération des fichiers');
+      }
 
-      return {
-        name: file,
-        isDirectory: fileStats.isDirectory(),
-        size: fileStats.size,
-        createdAt: fileStats.birthtime,
-      };
-    }));
+      const response = entries.map(entry => {
+          const entryPath = path.join(directoryPath, entry.name);
+          const { size, createdAt } = getFileDetails(entryPath);
 
-    res.json(filesDetails);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des fichiers :', error);
-    res.status(500).send('Erreur lors de la récupération des fichiers');
-  }
+          return {
+              name: entry.name,
+              type: entry.isDirectory() ? 'Folder' : 'File',
+              size: size, // Taille du fichier
+              createdAt: createdAt // Date de création du fichier
+          };
+      });
+
+      res.json(response);
+  });
 });
+
 
 // Lancer la vérification continue des nouveaux fichiers au démarrage du serveur
 checkAndDownloadNewFiles();
