@@ -1,0 +1,154 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
+const SftpClient = require('ssh2-sftp-client');
+const fs = require('fs');
+const path = require('path');
+const AdmZip = require('adm-zip');
+const { Console } = require('console');
+const cors = require('cors');
+const crypto = require('crypto');
+require('dotenv').config();
+
+
+
+const db = new sqlite3.Database('./database.db');
+
+const app = express();
+app.use(bodyParser.json());
+const port = 3000;
+app.use(cors());
+async function checkAndDownloadNewFiles() {
+  console.log("Vérification continue des nouveaux fichiers et téléchargement si nécessaire...");
+
+  // Chemin local où vous souhaitez stocker les fichiers téléchargés
+  const localDirectoryPath = path.join(__dirname, 'SFTPfiles');
+
+  try {
+    // Vérifiez si le dossier local existe, sinon créez-le
+    if (!fs.existsSync(localDirectoryPath)) {
+      fs.mkdirSync(localDirectoryPath, { recursive: true });
+      console.log(`Dossier ${localDirectoryPath} créé.`);
+    }
+
+    // Lire le contenu du répertoire sur le serveur SFTP de manière asynchrone
+    const remoteDirectoryPath = '/Data'; // Chemin du répertoire sur le serveur SFTP
+    const files = await getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath);
+
+    // Envoyer la liste des fichiers au client (dans un contexte réel, vous pourriez vouloir envoyer ces données à un client connecté via WebSocket ou un autre mécanisme)
+    console.log("Liste des fichiers téléchargés :", files);
+
+  } catch (err) {
+    // Gérer les erreurs de récupération des fichiers
+    console.error('Erreur lors de la récupération des fichiers:', err);
+  }
+
+  // Planifier la prochaine vérification des nouveaux fichiers dans 1 minute
+  setTimeout(checkAndDownloadNewFiles, 1000); // 60000 millisecondes = 1 minute
+}
+
+// Fonction pour déchiffrer un texte avec la clé de chiffrement
+function decrypt(encryptedText, key) {
+  const decipher = crypto.createDecipher('aes-256-cbc', key);
+  let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+const encryptionKey = process.env.ENCRYPTION_KEY;
+
+async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
+  const client = new SftpClient();
+  try {
+    await client.connect({
+      host: process.env.SFTP_HOST,
+      port: process.env.SFTP_PORT,
+      username: process.env.SFTP_USERNAME,
+      password: decrypt(process.env.SFTP_ENCRYPTED_PASSWORD, process.env.ENCRYPTION_KEY)
+    });
+
+    const files = await client.list(remoteDirectoryPath);
+    const downloadedFiles = [];
+
+    for (const file of files) {
+      const localFilePath = path.join(localDirectoryPath, file.name);
+      const localFileWithoutZip = localFilePath.replace('.zip', '');
+      const localDirPath = path.join(localDirectoryPath, file.name.replace('.zip', ''));
+      // Vérifiez si le fichier existe déjà dans le répertoire local
+      if (!fs.existsSync(localFilePath) && !fs.existsSync(localDirPath) ) {
+
+        // Le fichier n'existe pas, donc on le télécharge
+        await client.get(`${remoteDirectoryPath}/${file.name}`, localFilePath);
+        console.log(`Fichier ${file.name} téléchargé avec succès.`);
+
+        // Vérifiez si le fichier téléchargé est un fichier zip
+        if (path.extname(file.name).toLowerCase() === '.zip') {
+          // Vérifiez si le fichier zip est valide avant de le décompresser
+          const zip = new AdmZip(localFilePath);
+          if (zip.getEntries().length > 0) {
+            // Décompresser le fichier .zip
+            zip.extractAllTo(localDirectoryPath, /*overwrite*/ true);
+            console.log(`Fichier ${file.name} décompressé avec succès.`);
+
+            // Supprimer le fichier .zip après décompression
+            fs.unlinkSync(localFilePath);
+            console.log(`Fichier ${file.name} supprimé après décompression.`);
+          } else {
+            // Le fichier zip est corrompu ou vide, afficher un message d'erreur
+            console.error(`Le fichier zip ${file.name} est corrompu ou vide.`);
+          }
+        }
+
+        // Désiper le fichier (ajoutez votre code de désipage ici)
+
+        downloadedFiles.push(file.name);
+      } else {
+        // Le fichier existe déjà, pas besoin de le télécharger
+        console.log(`Fichier ${file.name} existe déjà, téléchargement sauté.`);
+      }
+    }
+
+    return downloadedFiles;
+  } catch (error) {
+    console.error(`Erreur lors de la récupération des fichiers depuis SFTP: ${error.message}`);
+    throw error;
+  } finally {
+    client.end();
+  }
+}
+
+app.get('/list-files', async (req, res) => {
+  const directoryPath = path.join(__dirname, 'SFTPfiles');
+
+  try {
+    const files = await fs.promises.readdir(directoryPath); // Utilisation de fs.promises.readdir() pour lire le répertoire de manière asynchrone
+    const filesDetails = await Promise.all(files.map(async (file) => {
+      const filePath = path.join(directoryPath, file);
+      const fileStats = await fs.promises.stat(filePath); // Utilisation de fs.promises.stat() pour obtenir les informations sur le fichier de manière asynchrone
+
+      return {
+        name: file,
+        isDirectory: fileStats.isDirectory(),
+        size: fileStats.size,
+        createdAt: fileStats.birthtime,
+      };
+    }));
+
+    res.json(filesDetails);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers :', error);
+    res.status(500).send('Erreur lors de la récupération des fichiers');
+  }
+});
+
+// Lancer la vérification continue des nouveaux fichiers au démarrage du serveur
+checkAndDownloadNewFiles();
+
+
+app.get('/test', (req, res) => {
+  res.send('Hello World!');
+});
+
+app.listen(port, () => {
+  console.log(`Serveur démarré sur http://localhost:${port}`);
+});
