@@ -5,13 +5,17 @@ const SftpClient = require('ssh2-sftp-client');
 const fs = require('fs');
 const path = require('path');
 const AdmZip = require('adm-zip');
+const { Console } = require('console');
+const cors = require('cors');
+
+
 
 const db = new sqlite3.Database('./database.db');
 
 const app = express();
 app.use(bodyParser.json());
 const port = 3000;
-
+app.use(cors());
 async function checkAndDownloadNewFiles() {
   console.log("Vérification continue des nouveaux fichiers et téléchargement si nécessaire...");
 
@@ -56,9 +60,11 @@ async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
 
     for (const file of files) {
       const localFilePath = path.join(localDirectoryPath, file.name);
-
+      const localFileWithoutZip = localFilePath.replace('.zip', '');
+      const localDirPath = path.join(localDirectoryPath, file.name.replace('.zip', ''));
       // Vérifiez si le fichier existe déjà dans le répertoire local
-      if (!fs.existsSync(localFilePath)) {
+      if (!fs.existsSync(localFilePath) && !fs.existsSync(localDirPath) ) {
+
         // Le fichier n'existe pas, donc on le télécharge
         await client.get(`${remoteDirectoryPath}/${file.name}`, localFilePath);
         console.log(`Fichier ${file.name} téléchargé avec succès.`);
@@ -99,10 +105,37 @@ async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
   }
 }
 
+app.get('/list-files', async (req, res) => {
+  const directoryPath = path.join(__dirname, 'SFTPfiles');
 
+  try {
+    const files = await fs.promises.readdir(directoryPath); // Utilisation de fs.promises.readdir() pour lire le répertoire de manière asynchrone
+    const filesDetails = await Promise.all(files.map(async (file) => {
+      const filePath = path.join(directoryPath, file);
+      const fileStats = await fs.promises.stat(filePath); // Utilisation de fs.promises.stat() pour obtenir les informations sur le fichier de manière asynchrone
+
+      return {
+        name: file,
+        isDirectory: fileStats.isDirectory(),
+        size: fileStats.size,
+        createdAt: fileStats.birthtime,
+      };
+    }));
+
+    res.json(filesDetails);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des fichiers :', error);
+    res.status(500).send('Erreur lors de la récupération des fichiers');
+  }
+});
 
 // Lancer la vérification continue des nouveaux fichiers au démarrage du serveur
 checkAndDownloadNewFiles();
+
+
+app.get('/test', (req, res) => {  
+  res.send('Hello World!');  
+});
 
 app.listen(port, () => {
   console.log(`Serveur démarré sur http://localhost:${port}`);
