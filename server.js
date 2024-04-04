@@ -96,7 +96,7 @@ app.get('/files', async (req, res) => {
       res.status(500).send('Erreur lors de la récupération des fichiers');
     }
   });
-  
+
 app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://207.180.204.159:3000');
 });
