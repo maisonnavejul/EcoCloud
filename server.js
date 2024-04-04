@@ -76,6 +76,27 @@ async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename)
   }
 }
 
+app.get('/files', async (req, res) => {
+    try {
+      const filesList = await fs.readdir(DATA_DIR);
+      const filesDetails = await Promise.all(filesList.map(async (fileName) => {
+        const filePath = path.join(DATA_DIR, fileName);
+        const stats = await fs.stat(filePath);
+        return {
+          name: fileName,
+          type: stats.isDirectory() ? 'Folder' : 'File',
+          size: stats.size,
+          createdAt: stats.birthtime,
+        };
+      }));
+  
+      res.json(filesDetails);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des fichiers :', error);
+      res.status(500).send('Erreur lors de la récupération des fichiers');
+    }
+  });
+  
 app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://207.180.204.159:3000');
 });
