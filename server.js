@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const fs = require('fs-extra');
 const multer = require('multer');
 const path = require('path');
@@ -94,6 +95,16 @@ app.get('/files', async (req, res) => {
     } catch (error) {
       console.error('Erreur lors de la récupération des fichiers :', error);
       res.status(500).send('Erreur lors de la récupération des fichiers');
+    }
+  });
+
+app.get('/test-recup', async (req, res) => {
+    try {
+      const response = await axios.get('https://b0b6-37-167-148-18.ngrok-free.app/list-files');
+      res.json(response.data); // Envoie les données JSON récupérées en réponse
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+      res.status(500).send('Erreur lors de la récupération des données');
     }
   });
 
