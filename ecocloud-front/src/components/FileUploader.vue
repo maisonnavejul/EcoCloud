@@ -1,24 +1,27 @@
 <template>
-  <div>
-    <div>
+  <div class="file-manager">
+    <div class="file-actions">
       <input type="file" id="fileUpload" multiple @change="handleFiles(false, $event)" />
       <button @click="pauseUpload">Pause</button>
       <button @click="resumeUpload">Reprendre</button>
       <input type="file" id="folderUpload" webkitdirectory directory multiple @change="handleFiles(true, $event)" />
-      <div v-if="resumable">
-        <progress :value="progress" max="100"></progress>
-        <p>Progression : {{ progress }}%</p>
-      </div>
-    <button @click="fetchFilesList('')">Racine</button>
-    <ul>
-      <li v-for="item in filesList" :key="item.name" @click="handleItemClick(item)">
-        <div><strong>Nom :</strong> {{ item.name }}</div>
-        <div>Type : {{ item.type }}</div>
-        <div>Taille : {{ formatSize(item.size) }}</div>
-        <div>Date de création : {{ formatDate(item.createdAt) }}</div>
+    </div>
+
+    <div class="progress-bar" v-if="resumable">
+      <progress :value="progress" max="100"></progress>
+      <p>Progression : {{ progress }}%</p>
+    </div>
+
+    <button @click="fetchFilesList('')">Voir la racine</button>
+
+    <ul class="files-list">
+      <li v-for="item in filesList" :key="item.name">
+        <div @click="item.type === 'Folder' && navigateTo(item.name)">
+          <strong>{{ item.name }}</strong> - {{ item.type }} - {{ formatSize(item.size) }} - {{ formatDate(item.createdAt) }}
+        </div>
+        <button v-if="item.type === 'File'" @click.stop="downloadItem(item.name)">Télécharger</button>
       </li>
     </ul>
-    </div>
   </div>
 </template>
 
@@ -32,6 +35,7 @@ export default {
       filesList: [],
       resumable: null,
       progress: 0,
+      currentPath: '',
     };
   },
   methods: {
@@ -40,29 +44,29 @@ export default {
         const response = await fetch(`http://207.180.204.159:3000/test-recup?path=${encodeURIComponent(path)}`);
         if (!response.ok) throw new Error('Erreur réseau');
         this.filesList = await response.json();
+        this.currentPath = path;
       } catch (error) {
         console.error('Erreur lors de la récupération des fichiers:', error);
       }
     },
-    handleItemClick(item) {
-      if (item.type === 'Folder') {
-        this.fetchFilesList(`${item.name}`);
-      }
+    navigateTo(folderName) {
+      const newPath = this.currentPath ? `${this.currentPath}/${folderName}` : folderName;
+      this.fetchFilesList(newPath);
+    },
+    downloadItem(fileName) {
+      const fullPath = this.currentPath ? `${this.currentPath}/${fileName}` : fileName;
+      window.location.href = `http://207.180.204.159:3000/download?path=${encodeURIComponent(fullPath)}`;
     },
     formatSize(size) {
-      if (size === undefined) return 'N/A';
-      if (size < 1024) return `${size} bytes`;
-      else if (size < 1048576) return `${(size / 1024).toFixed(1)} KB`;
-      else if (size < 1073741824) return `${(size / 1048576).toFixed(1)} MB`;
-      return `${(size / 1073741824).toFixed(1)} GB`;
+      if (!size) return 'N/A';
+      if (size < 1024) return `${size} Bytes`;
+      else if (size < 1048576) return `${(size / 1024).toFixed(2)} KB`;
+      else if (size < 1073741824) return `${(size / 1048576).toFixed(2)} MB`;
+      return `${(size / 1073741824).toFixed(2)} GB`;
     },
     formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleDateString("fr-FR", {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+      return date.toLocaleDateString("fr-FR");
     },
     handleFiles(isDirectory, event) {
       const files = event.target.files;
