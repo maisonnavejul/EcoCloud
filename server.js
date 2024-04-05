@@ -142,6 +142,40 @@ app.get('/files', async (req, res) => {
     }
   });
 
+  app.delete('/delete-file', async (req, res) => {
+    const { filePath } = req.body;
+    console.log('Suppression demandée pour:', filePath);
+
+    // Construire le chemin complet vers le fichier ou le dossier
+    const fullPath = path.join(DATA_DIR, filePath);
+
+    try {
+        // Suppression externe via l'API
+        const externalResponse = await axios.delete('https://739c-185-223-151-250.ngrok-free.app/delete-file', { data: req.body });
+        console.log('Réponse du serveur EcoCloud :', externalResponse.data);
+
+        // Suppression locale
+        let localMessage = 'Pas de suppression locale nécessaire.';
+        if (await fs.pathExists(fullPath)) {
+            await fs.remove(fullPath);
+            localMessage = 'Supprimé avec succès localement.';
+        }
+        if (await fs.pathExists(fullPath + '.zip')) {
+            await fs.remove(fullPath + '.zip');
+            localMessage = 'Supprimé dossier avec succès localement.';
+        }       
+
+        // Envoyer une réponse combinée
+        res.json({ externalMessage: externalResponse.data.message, localMessage: localMessage });
+    } catch (error) {
+        console.error('Erreur lors de la suppression du fichier/dossier:', error);
+        // Il est important de vérifier si l'erreur est due à l'envoi d'une réponse ou à autre chose
+        if (!res.headersSent) {
+            res.status(500).send('Erreur lors de la suppression du fichier/dossier');
+          }
+        }
+    });
+
 app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://207.180.204.159:3000');
 });
