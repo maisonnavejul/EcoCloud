@@ -1,6 +1,7 @@
 <template>
   <div class="file-manager">
     <div class="file-actions">
+      <!-- Boutons pour uploader des fichiers ou des dossiers -->
       <input type="file" id="fileUpload" multiple @change="handleFiles(false, $event)" />
       <button @click="pauseUpload">Pause</button>
       <button @click="resumeUpload">Reprendre</button>
@@ -15,13 +16,14 @@
     <button @click="fetchFilesList('')">Voir la racine</button>
 
     <ul class="files-list">
-      <li v-for="item in filesList" :key="item.name">
-        <div @click="item.type === 'Folder' && navigateTo(item.name)">
-          <strong>{{ item.name }}</strong> - {{ item.type }} - {{ formatSize(item.size) }} - {{ formatDate(item.createdAt) }}
-        </div>
-        <button v-if="item.type === 'File'" @click.stop="downloadItem(item.name)">Télécharger</button>
-      </li>
-    </ul>
+  <li v-for="item in filesList" :key="item.name">
+    <div>
+      <strong @click="item.type === 'Folder' && navigateTo(item.name)">{{ item.name }}</strong> - {{ item.type }} - {{ formatSize(item.size) }} - {{ formatDate(item.createdAt) }}
+      <button @click.stop.prevent="downloadItem(item.name, item.type)">Télécharger</button>
+    </div>
+  </li>
+</ul>
+
   </div>
 </template>
 
@@ -56,6 +58,40 @@ export default {
     downloadItem(fileName) {
       const fullPath = this.currentPath ? `${this.currentPath}/${fileName}` : fileName;
       window.location.href = `http://207.180.204.159:3000/download?path=${encodeURIComponent(fullPath)}`;
+    },
+
+    async startChunkedDownload(url, fileName) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentLength = response.headers.get('content-length');
+        if (!contentLength) throw new Error('La taille du contenu n\'est pas disponible.');
+
+        let receivedLength = 0;
+        const chunks = [];
+        while (receivedLength < contentLength) {
+          const chunkResponse = await fetch(url, {
+            headers: {
+              'Range': `bytes=${receivedLength}-${Math.min(receivedLength + 1024 * 1024 - 1, contentLength - 1)}`
+            }
+          });
+          const chunk = await chunkResponse.arrayBuffer();
+          chunks.push(chunk);
+          receivedLength += chunk.byteLength;
+          this.progress = (receivedLength / contentLength) * 100;
+        }
+
+        const blob = new Blob(chunks);
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (error) {
+        console.error('Erreur lors du téléchargement:', error);
+      }
     },
     formatSize(size) {
       if (!size) return 'N/A';
