@@ -6,6 +6,7 @@
       <button @click="pauseUpload">Pause</button>
       <button @click="resumeUpload">Reprendre</button>
       <input type="file" id="folderUpload" webkitdirectory directory multiple @change="handleFiles(true, $event)" />
+      
     </div>
 
     <div class="progress-bar" v-if="resumable">
@@ -20,6 +21,7 @@
     <div>
       <strong @click="item.type === 'Folder' && navigateTo(item.name)">{{ item.name }}</strong> - {{ item.type }} - {{ formatSize(item.size) }} - {{ formatDate(item.createdAt) }}
       <button @click.stop.prevent="downloadItem(item.name, item.type)">Télécharger</button>
+      <button @click.stop.prevent="deleteItem(item.name)">Supprimer</button>
     </div>
   </li>
 </ul>
@@ -51,6 +53,7 @@ export default {
         console.error('Erreur lors de la récupération des fichiers:', error);
       }
     },
+    
     navigateTo(folderName) {
       const newPath = this.currentPath ? `${this.currentPath}/${folderName}` : folderName;
       this.fetchFilesList(newPath);
@@ -93,6 +96,33 @@ export default {
         console.error('Erreur lors du téléchargement:', error);
       }
     },
+    async deleteItem(filePath) {
+  if (!confirm("Êtes-vous sûr de vouloir supprimer ce fichier/dossier ?")) {
+    return;
+  }
+  try {
+    // Remplacez 'http://localhost:3000' par l'URL de votre serveur
+    const fullPath = this.currentPath ? `${this.currentPath}/${filePath}` : filePath;
+    const response = await fetch('http://207.180.204.159:3000/delete-file', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filePath: fullPath }),
+    });
+    console.log(fullPath);
+    if (response.ok) {
+      console.log('Fichier/dossier supprimé avec succès.');
+      await this.fetchFilesList(this.currentPath);
+    } else {
+      throw new Error('Échec de la suppression du fichier/dossier.');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error);
+  }
+},
+
+
     formatSize(size) {
       if (!size) return 'N/A';
       if (size < 1024) return `${size} Bytes`;
