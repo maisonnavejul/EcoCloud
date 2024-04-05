@@ -146,21 +146,33 @@ app.get('/download', (req, res) => {
   const filePath = req.query.path;
   const fullPath = path.join(ROOT_DIR, filePath);
 
+  console.log('Demande de téléchargement du fichier:', fullPath);
+
   if (fs.existsSync(fullPath)) {
+    let filename = path.basename(fullPath);
+
+    // Encoder le nom de fichier pour gérer les caractères spéciaux
+    const encodedFilename = encodeURIComponent(filename);
+
     if (fs.statSync(fullPath).isDirectory()) {
       const zip = new AdmZip();
       zip.addLocalFolder(fullPath);
       const zipBuffer = zip.toBuffer();
+      
+      // Assurez-vous que le nom du fichier ZIP est correctement encodé
       res.setHeader('Content-Type', 'application/zip');
-      res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fullPath)}.zip"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${encodedFilename}.zip"`);
       res.send(zipBuffer);
     } else {
+      // Pour les fichiers, utilisez le nom encodé dans l'URL de téléchargement
+      res.setHeader('Content-Disposition', `attachment; filename="${encodedFilename}"`);
       res.download(fullPath);
     }
   } else {
     res.status(404).send('Fichier ou dossier non trouvé');
   }
 });
+
 
 // Lancer la vérification continue des nouveaux fichiers au démarrage du serveur
 checkAndDownloadNewFiles();
