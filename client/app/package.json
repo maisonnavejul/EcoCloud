@@ -11,8 +11,10 @@
   "dependencies": {
     "jszip": "^3.10.1",
     "resumablejs": "^1.1.0",
+    "tippy.js": "^6.3.7",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
+    "vuetify": "^3.4.0-beta.1",
     "vuex": "^4.1.0"
   },
   "devDependencies": {

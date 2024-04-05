@@ -1,7 +1,9 @@
 <template>
     <div class="home">
         <Toolbar @openFileUploaderModal="is_uploader_mod_open=true"/>
-        <FileViewer />
+        <div class="home_viewer">
+            <FileViewer />
+        </div>
         <FileUploaderModal v-if="is_uploader_mod_open" @close="is_uploader_mod_open=false"/>
     </div>
 </template>
@@ -44,3 +46,13 @@ export default {
     },
 }
 </script>
+
+
+<style>
+.home_viewer {
+    height: 100%;
+    width: 90%;
+    margin: 0 5%;
+}
+
+</style>

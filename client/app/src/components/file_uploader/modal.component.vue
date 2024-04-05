@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import FileUploader from './FileUploader.vue';
+import FileUploader from './file_uploader.component.vue';
 export default {
     name: 'FileUploaderModal',
     components: {
@@ -45,7 +45,7 @@ export default {
   padding: 20px;
   border: 1px solid #888;
   border-radius: 10px;
-  width: 40%;
-  height: 20%;
+  width: fit-content;
+  height: fit-content;
 }
 </style>

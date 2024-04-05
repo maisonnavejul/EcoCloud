@@ -47,7 +47,7 @@ export default {
 
 .toolbar_itm > button {
     border-radius: 10px;
-    border: 1px solid #d9d9d9;
+    border: 1px solid #a9a9a9;
     height: 26px;
     width: 100px;
     font-size: 14px;
