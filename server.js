@@ -9,6 +9,7 @@ const { promisify } = require('util');
 const pipelineAsync = promisify(pipeline);
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const upload = multer({ dest: '/home/EcoCloud/Chunks' }); // Stocke les fragments dans le dossier temporaire 'Chunks'
 const CHUNKS_DIR = '/home/EcoCloud/Chunks';
