@@ -1,7 +1,7 @@
 <template>
     <div class="path_viewer">
         <div class="path_element" v-for="path_el in get_path()">
-            <p class="folder">{{ path_el.label }}</p>
+            <p class="folder" @click="$emit('parent', path_el.path)">{{ path_el.label }}</p>
             <p class="separator">></p>
         </div>
     </div>

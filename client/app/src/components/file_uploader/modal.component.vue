@@ -1,7 +1,9 @@
 <template>
     <div class="modal" @click="outsideModalClick">
         <div class="modal-content" @click.stop>
-            <FileUploader ref="file_uploader" @close="$emit('close')"/>
+            <FileUploader ref="file_uploader" 
+                          @close="$emit('close')" 
+                          @refresh="$emit('refresh')"/>
         </div>
     </div>
 </template>

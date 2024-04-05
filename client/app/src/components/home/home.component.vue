@@ -1,24 +1,29 @@
 <template>
     <div class="home">
-        <Toolbar @openFileUploaderModal="is_uploader_mod_open=true"/>
+        <Toolbar @openFileUploaderModal="is_uploader_mod_open=true"
+                 @download="handleDownload"
+                 @delete="handleDelete"
+                 @refresh="handleRefresh"/>
         <div class="home_viewer">
-            <FileViewer />
+            <FileViewer ref="file_viewer"/>
         </div>
-        <FileUploaderModal v-if="is_uploader_mod_open" @close="is_uploader_mod_open=false"/>
+        <Modal v-if="is_uploader_mod_open" 
+               @close="is_uploader_mod_open=false"
+               @refresh="handleRefresh"/>
     </div>
 </template>
 
 <script>
 import Toolbar from '../toolbar/toolbar.component.vue';
 import FileViewer from '../file_viewer/file_viewer.component.vue';
-import FileUploaderModal from '../file_uploader/modal.component.vue';
+import Modal from '../file_uploader/modal.component.vue';
 
 export default {
     name: 'Home',
     components: {
         Toolbar,
         FileViewer,
-        FileUploaderModal
+        Modal
     },
 
     computed: {
@@ -39,6 +44,18 @@ export default {
                 this.$router.push('/login');
             }
         },
+
+        async handleRefresh() {
+            this.$refs.file_viewer.files = await this.$refs.file_viewer.get_files();
+        },
+
+        handleDownload() {
+            this.$refs.file_viewer.download_files();
+        }, 
+
+        async handleDelete() {
+            await this.$refs.file_viewer.delete_files();
+        }
     },
 
     mounted() {

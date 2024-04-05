@@ -1,6 +1,6 @@
 <template>
     <div class="file_wrapper">
-        <PathViewer ref="path_viewer"/>
+        <PathViewer ref="path_viewer" @parent="handleParent"/>
         <table class="file_viewer">
             <thead>
                 <tr>
@@ -14,11 +14,14 @@
             <tbody>
                 <FileViewerItem v-for="file in files" 
                                 :name="file.name" 
-                                :type="file.type"
+                                :type="file.type.toLowerCase()"
                                 :path="this.path" 
                                 :size="file.size"
-                                :created_on="file.created_on"
+                                :created_on="file.createdAt"
                                 :key="file.name"
+                                @navigate="handleNavigate"
+                                @check="handleCheck(file)"
+                                @uncheck="handleUncheck(file)"
                                 class="viewer_item"/>
             </tbody>
         </table>
@@ -70,24 +73,93 @@ export default {
     },
     data() {
         return {
-            files: null,
-            path: '../../../test_files/lab5/'
+            files: [],
+            path: '../../../test_files/lab5/',
+            checked_files: []
         }
     },
 
+    async created() {
+        this.files = await this.get_files();
+    },
+
     methods: {
-        get_files() {
-            
+        async get_files() {
+            try {
+                const path = this.$store.state.cwd;
+                console.log('PATH', path);
+                const response = await fetch(`http://207.180.204.159:3000/test-recup?path=${encodeURIComponent(path)}`);
+                
+                if (!response.ok) throw new Error("Error while fetching files")
+                   
+                const json = await response.json();
+
+                return json;
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération des fichiers:', error);
+            }
         },
+
+        async handleNavigate(path) {
+            const new_path = `${this.$store.state.cwd}/${path}/`;
+            this.$store.dispatch('change_dir', new_path);
+            this.files = await this.get_files();
+        },
+
+        async handleParent(path) {
+            this.$store.dispatch('change_dir', path);
+            this.files = await this.get_files();
+        },
+
         get_files_offline() {
-            this.files = tmp_files;
+            return tmp_files;
+        },
+
+        handleCheck(file) {
+            this.checked_files.push(file);
+            console.log(this.checked_files);
+        },
+
+        handleUncheck(file) {
+            const tmp = this.checked_files
+            this.checked_files = [];
+            tmp.forEach((f, index) => {
+                if (f.name !== file.name) {
+                    this.checked_files.push(f);
+                }
+            });
+            console.log(this.checked_files);
+        },
+
+        download_files() {
+            this.checked_files.forEach(file => {
+                const path = `${this.$store.state.cwd}/${file.name}`;
+                const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
+                try {
+                    window.open(url, '_blank');
+                } catch (error) {
+                    console.log('Erreur lors du téléchargement des fichiers')
+                }
+            });
+        },
+
+        async delete_files() {
+            await this.checked_files.forEach(async file =>{
+                const path = `${this.$store.state.cwd}/${file.name}`;
+                const response = await fetch('http://207.180.204.159:3000/delete-file', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                    body: JSON.stringify({ filePath: path }),
+                });
+            });
         }
     },
 
     mounted() {
-        this.get_files();
-        console.log(this.files);
-        console.log(this.$refs.path_viewer.get_path());
+        console.log('mounted');
     }
 }
 </script>

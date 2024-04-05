@@ -41,7 +41,7 @@ export default {
             required: true
         },
         created_on: {
-            type: Date,
+            type: String,
             required: true
         }
     },
@@ -53,6 +53,11 @@ export default {
 
         handle_click() {
             this.is_selected = !this.is_selected;
+            const obj = {
+                name: this.name,
+                type: this.type
+            }
+            this.is_selected ? this.$emit('check', obj) : this.$emit('uncheck', obj);
         },
 
         handle_dblclick() {
@@ -60,16 +65,25 @@ export default {
         },
 
         open_folder() {
-            console.log('Open Folder');
+            this.$emit('navigate', this.name);
         },  
 
         view_file() {
             // const path = `${this.path}/${this.name}`;
-            const path = `${this.path}/${this.name}`
-            window.open(path, '_blank');
+            const path = `${this.$store.state.cwd}/${this.name}`
+            const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
+            window.open(url, '_blank');
         },
 
         size_transform() {
+            if (this.is_folder(this.type)) {
+                return this.size + ' items';
+            } else {
+                return this.file_size_transform();
+            } 
+        },
+
+        file_size_transform() {
             const units = ['B', 'KB', 'MB', 'GB', 'TB'];
             let size = this.size;
             let unit_index = 0;
@@ -87,12 +101,9 @@ export default {
         
         },
 
-        format_date() {
-            const year = this.created_on.getFullYear();
-            const month = ("0" + (this.created_on.getMonth() + 1)).slice(-2); // Months are zero based
-            const day = ("0" + this.created_on.getDate()).slice(-2);
-
-            return `${year}-${month}-${day}`;
+        format_date(dateString) {
+            const date = new Date(this.created_on);
+            return date.toLocaleDateString("fr-FR");
         },
 
         get_icon() {

@@ -25,13 +25,13 @@ export default {
                     class: 'file_uploader_btn',
                 },
                 {
-                    name: 'Add File',
-                    callback: this.add_file,
-                    class: 'file_adder',
+                    name: 'Download',
+                    callback: this.download,
+                    class: 'downloader',
                 },
                 {
-                    name: 'Add Folder',
-                    callback: this.add_folder,
+                    name: 'Delete',
+                    callback: this.delete,
                     class: '',
                 },
                 {
@@ -44,17 +44,19 @@ export default {
     },
 
     methods: {
-        add_file() {
-            console.log('Add File')
+        download() {
+            this.$emit('download');
         },
-        add_folder() {
-            console.log('Add Folder');
+        delete() {
+            if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement les fichiers ?')) {
+                this.$emit('delete');
+            }
         },
         upload() {
             this.$emit('openFileUploaderModal');
         },
         refresh() {
-            console.log('Refresh');
+            this.$emit('refresh');
         }
     },
 }

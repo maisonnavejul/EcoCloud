@@ -4,7 +4,7 @@ export default createStore({
     state: {
         is_logged_in: false,
         user: null,
-        cwd: '/test',
+        cwd: '/',
     },
 
     mutations: {
@@ -16,11 +16,8 @@ export default createStore({
             state.is_logged_in = false;
             state.user = null;
         },
-        CHANGEDIR(state, folder_name) {
-            state.cwd = state.cwd + folder_name + '/';
-        },
-        BACKDIR(state) {
-            state.cwd = state.cwd.substring(0, state.cwd.lastIndexOf('/'));
+        CHANGEDIR(state, new_path) {
+            state.cwd = new_path;
         },
 
     },
@@ -32,11 +29,8 @@ export default createStore({
         logout({ commit }) {
             commit('LOGOUT');
         },
-        change_dir({ commit }, folder_name) {
-            commit('CHANGEDIR', folder_name);
-        },
-        back_dir({ commit }) {
-            commit('BACKDIR');
+        change_dir({ commit }, new_path) {
+            commit('CHANGEDIR', new_path);
         },
     },
 });

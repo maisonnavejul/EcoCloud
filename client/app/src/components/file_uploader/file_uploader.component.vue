@@ -199,10 +199,11 @@ export default {
       this.resumable = null;
     },
     closeUploader() {
-      this.$emit('close');
       if (this.resumable) {
         this.cancelUpload();
       }
+      this.$emit('close');
+      this.$emit('refresh');
     },
     change_save_check() {
       this.is_save_checked = !this.is_save_checked;
