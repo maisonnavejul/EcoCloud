@@ -142,7 +142,25 @@ app.get('/list-files', async (req, res) => {
       res.json(response);
   });
 });
+app.get('/download', (req, res) => {
+  const filePath = req.query.path;
+  const fullPath = path.join(ROOT_DIR, filePath);
 
+  if (fs.existsSync(fullPath)) {
+    if (fs.statSync(fullPath).isDirectory()) {
+      const zip = new AdmZip();
+      zip.addLocalFolder(fullPath);
+      const zipBuffer = zip.toBuffer();
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${path.basename(fullPath)}.zip"`);
+      res.send(zipBuffer);
+    } else {
+      res.download(fullPath);
+    }
+  } else {
+    res.status(404).send('Fichier ou dossier non trouvé');
+  }
+});
 
 // Lancer la vérification continue des nouveaux fichiers au démarrage du serveur
 checkAndDownloadNewFiles();
