@@ -4,6 +4,9 @@ const fs = require('fs-extra');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const pipelineAsync = promisify(pipeline);
 const app = express();
 app.use(cors());
 
@@ -103,7 +106,7 @@ app.get('/files', async (req, res) => {
     
     try {
       // Remplacez l'URL par celle de votre serveur EcoCloud ou de l'API que vous souhaitez interroger
-      const ecoCloudUrl = `https://b0b6-37-167-148-18.ngrok-free.app/list-files?path=${encodeURIComponent(folderPath)}`;
+      const ecoCloudUrl = `https://739c-185-223-151-250.ngrok-free.app/list-files?path=${encodeURIComponent(folderPath)}`;
       const response = await axios.get(ecoCloudUrl);
       
       // Redirige la réponse de l'API directement au client
@@ -113,7 +116,31 @@ app.get('/files', async (req, res) => {
       res.status(500).send('Erreur lors de la récupération des données');
     }
   });
+app.get('/download', async (req, res) => {
+  const filePath = req.query.path;
+  const ecoCloudDownloadUrl = `https://739c-185-223-151-250.ngrok-free.app/download?path=${encodeURIComponent(filePath)}`;
 
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: ecoCloudDownloadUrl,
+      responseType: 'stream',
+    });
+
+    res.setHeader('Content-Disposition', response.headers['content-disposition']);
+    res.setHeader('Content-Type', response.headers['content-type']);
+
+    // Utilisez `pipelineAsync` ici avec des streams valides
+    await pipelineAsync(response.data, res).catch(err => {
+      console.error('Erreur lors du stream du fichier:', err);
+      res.status(500).send('Erreur lors du stream du fichier');
+    });
+
+  } catch (error) {
+    console.error('Erreur lors du téléchargement:', error);
+    res.status(500).send('Erreur lors du téléchargement du fichier ou du dossier');
+  }
+});
 
 app.listen(3000, '0.0.0.0', () => {
   console.log('Serveur démarré sur http://207.180.204.159:3000');
