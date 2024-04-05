@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const SftpClient = require('ssh2-sftp-client');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const AdmZip = require('adm-zip');
 const { Console } = require('console');
@@ -175,6 +175,28 @@ app.get('/download', (req, res) => {
     }
   } else {
     res.status(404).send('Fichier ou dossier non trouvé');
+  }
+});
+
+app.delete('/delete-file', async (req, res) => {
+  const { filePath } = req.body;
+  console.log('Suppression demandée pour:', filePath);
+  const fullPath = path.join(ROOT_DIR, filePath);
+
+  try {
+      // Vérifiez d'abord si le chemin existe pour éviter les erreurs
+      if (!await fs.pathExists(fullPath)) {
+          console.log('Fichier/dossier non trouvé:', fullPath);
+          return res.status(404).send('Fichier ou dossier non trouvé');
+      }
+
+      // Supprime le fichier ou le dossier, y compris s'il est un dossier non vide
+      await fs.remove(fullPath);
+      console.log('Supprimé avec succès:', fullPath);
+      res.send({ message: 'Fichier/dossier supprimé avec succès' });
+  } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      res.status(500).send('Erreur lors de la suppression');
   }
 });
 
