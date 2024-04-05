@@ -8,8 +8,6 @@ const AdmZip = require('adm-zip');
 const { Console } = require('console');
 const cors = require('cors');
 
-
-
 const db = new sqlite3.Database('./database.db');
 
 const app = express();
@@ -129,19 +127,26 @@ app.get('/list-files', async (req, res) => {
 
       const response = entries.map(entry => {
           const entryPath = path.join(directoryPath, entry.name);
-          const { size, createdAt } = getFileDetails(entryPath);
+          let { size, createdAt } = getFileDetails(entryPath);
+      
+      const isDirectory = fs.statSync(entryPath).isDirectory();
 
-          return {
+      size = isDirectory ? fs.readdirSync(entryPath).length : getFileDetails(entryPath).size;
+
+      return {
               name: entry.name,
               type: entry.isDirectory() ? 'Folder' : 'File',
               size: size, // Taille du fichier
               createdAt: createdAt // Date de création du fichier
+
+
           };
       });
 
       res.json(response);
   });
 });
+
 app.get('/download', (req, res) => {
   const filePath = req.query.path;
   const fullPath = path.join(ROOT_DIR, filePath);
