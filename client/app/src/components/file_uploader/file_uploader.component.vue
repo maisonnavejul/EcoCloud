@@ -39,13 +39,13 @@
       <div class="progress_bar" v-if="has_upload_started">
         <progress :value="progress" max="100"></progress>
         <div class="progress_toolbar">
-          <img src="../../assets/icons/video.png" 
+          <img src="../../assets/icons/tool_icons/video.png" 
                @click="pauseUpload" 
                :class="{ 'enabled_img': !is_paused, 'disabled-img': is_paused }" />
-          <img src="../../assets/icons/play-button.png" 
+          <img src="../../assets/icons/tool_icons/play-button.png" 
                @click="resumeUpload" 
                :class="{ 'enabled_img': is_paused, 'disabled-img': !is_paused }">
-          <img src="../../assets/icons/close.png"
+          <img src="../../assets/icons/tool_icons/close.png"
                @click="cancelUpload" />
         </div>
       </div>

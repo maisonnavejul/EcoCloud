@@ -2,6 +2,7 @@ import { createStore } from 'vuex';
 
 export default createStore({
     state: {
+        is_offline: true, // set true if backend server is offline
         is_logged_in: false,
         user: null,
         cwd: '/',

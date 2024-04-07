@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { get_file_icon, get_folder_icon } from '../../scripts/data/icon_hashmap.script';
+
 export default {
     name: 'FileViewerItem',
     data() {
@@ -107,7 +109,14 @@ export default {
         },
 
         get_icon() {
-            const icon_name = this.is_folder(this.type) ? 'src/assets/icons/folder.png' : 'src/assets/icons/file.png';
+            const ext = this.name.split('.').pop();
+
+            if (this.is_folder(this.type)) {
+                return get_folder_icon(ext);
+            } else {
+                return get_file_icon(ext);
+            }
+            const icon_name = this.is_folder(this.type) ? 'src/assets/icons/file_icons/folder.png' : 'src/assets/icons/file_icons/file.png';
             return icon_name;
         }
     }
@@ -119,6 +128,7 @@ export default {
     margin-bottom: 5%;
     height:  38px;
     width: 100%;
+    transition: 0.3s;
 }
 
 

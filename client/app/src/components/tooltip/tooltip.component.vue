@@ -1,6 +1,6 @@
 <template>
     <div class="tooltip">
-        <img src="../../assets/icons/support.png" ref="img" />
+        <img src="../../assets/icons/tool_icons/support.png" ref="img" />
     </div>
 </template>
 
