@@ -2,6 +2,9 @@
     <div class="login_container">
         <div class="login">
             <h2 class="login_title">Welcome Back !</h2>
+            <div class="login_failed" v-if="login_failed">
+                <p>Une information de connexion est incorrecte</p>
+            </div>
             <form class="login_form" @submit.prevent="offline_login">
                 <input type="text" 
                     name="username" 
@@ -40,6 +43,7 @@ export default {
         return {
             username: "",
             password: "",
+            login_failed: false,
         }
     },
 
@@ -55,6 +59,7 @@ export default {
                 this.parse_res(response);
             } else {
                 console.log('Login failed');
+                this.login_failed = true;
             }
         },
         async login() {
@@ -89,7 +94,9 @@ export default {
         parse_res(res) {
             if (!res.is_connected) {
                 console.log('Login failed');
+                this.login_failed = true;
             } else {
+                this.login_failed = false;
                 this.$store.dispatch('login', res)
                     .then(() => {
                         const next_route = !res.email ? '/register' : '/';
@@ -130,6 +137,26 @@ export default {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
 }
 
+.login_title {
+    font-size: 25px;
+    margin-top: 5%;
+    margin-bottom: 4%;
+}
+
+.login_failed {
+    background-color: rgb(255, 87, 87, 0.6);
+    border: 1px solid rgb(143, 55, 55);
+    border-radius: 5px;
+    width: 45%;
+    height: 18%;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4%;
+}
+
 .login_form {
     display: flex;
     flex-direction: column;
@@ -140,11 +167,6 @@ export default {
     height: 100%;
 }
 
-.login_title {
-    font-size: 25px;
-    margin-top: 5%;
-    margin-bottom: 7%;
-}
 
 .login_form > * {
     margin-bottom: 1%;

@@ -2,6 +2,9 @@
     <div class="register_container">
         <div class="register">
             <h2 class="register_title">Welcome</h2>
+            <div class="register_failed" v-if="register_failed">
+                <p>Une information d'enregistrement est incorrecte</p>
+            </div>
             <form class="register_form" @submit.prevent="offline_register">
                 <input type="text" 
                     name="username" 
@@ -49,16 +52,19 @@ export default {
             password: "",
             email: "",
             firstname: "",
-            lastname: ""
+            lastname: "",
+            register_failed: false,
         }
     },
 
     methods: {
         offline_register() {
             if (this.check_form()) {
+                this.register_failed = true;
                 console.log('Please fill in all fields');
                 return;
             } 
+            this.register_failed = false;
 
             console.log('Register successful');
             this.parse_res(data);
@@ -67,9 +73,12 @@ export default {
         async register() {
             // PUT 10.222.7.145:3000/updateUser
             if (this.check_form()) {
+                this.register_failed = true;
                 console.log('Please fill in all fields');
                 return;
             }
+
+            this.register_failed = false;
 
             console.log('Register submitted successfully');
 
@@ -136,6 +145,12 @@ export default {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
 }
 
+.register_title {
+    font-size: 25px;
+    margin-top: 5%;
+    margin-bottom: 7%;
+}
+
 .register_form {
     display: flex;
     flex-direction: column;
@@ -146,10 +161,18 @@ export default {
     height: 100%;
 }
 
-.register_title {
-    font-size: 25px;
-    margin-top: 5%;
-    margin-bottom: 7%;
+.register_failed {
+    background-color: rgb(255, 87, 87, 0.6);
+    border: 1px solid rgb(143, 55, 55);
+    border-radius: 5px;
+    width: 45%;
+    height: 18%;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4%;
 }
 
 .register_form > * {
