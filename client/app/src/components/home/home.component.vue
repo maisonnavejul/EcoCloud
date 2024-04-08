@@ -39,12 +39,6 @@ export default {
     },
 
     methods: {
-        check_connection() {
-            if (!this.is_logged_in) {
-                this.$router.push('/login');
-            }
-        },
-
         async handleRefresh() {
             this.$refs.file_viewer.files = await this.$refs.file_viewer.get_files();
         },
@@ -56,10 +50,6 @@ export default {
         async handleDelete() {
             await this.$refs.file_viewer.delete_files();
         }
-    },
-
-    mounted() {
-        this.check_connection();
     },
 }
 </script>
