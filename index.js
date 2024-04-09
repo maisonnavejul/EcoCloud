@@ -7,6 +7,8 @@ const path = require('path');
 const AdmZip = require('adm-zip');
 const { Console } = require('console');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const db = new sqlite3.Database('./database.db');
 
@@ -114,7 +116,19 @@ const getFileDetails = (filePath) => {
       createdAt: stats.birthtime // Date de création
   };
 };
-
+function ajouterUtilisateur({ email, psw, firstname, lastname, username, is_admin }, callback) {
+  bcrypt.hash(psw, saltRounds, function(err, hash) {
+    if (err) {
+      return callback(err);
+    }
+    db.run(`INSERT INTO utilisateurs (email, psw, firstname, lastname, username, is_admin) VALUES (?, ?, ?, ?, ?, ?)`, [email, hash, firstname, lastname, username, is_admin], function(err) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, { userId: this.lastID });
+    });
+  });
+}
 app.get('/list-files', async (req, res) => {
   const reqPath = req.query.path || '';
   const directoryPath = path.join(ROOT_DIR, reqPath);
@@ -208,6 +222,108 @@ checkAndDownloadNewFiles();
 app.get('/test', (req, res) => {  
   res.send('Hello World!');  
 });
+
+app.post('/login', (req, res) => {
+  const { username, psw } = req.body;
+
+  db.get(`SELECT * FROM utilisateurs WHERE username = ?`, [username], (err, user) => {
+    if (err) {
+      console.log('Erreur lors de la récupération de l’utilisateur:', err);
+      return res.status(500).json({ is_connected: false, message: "Erreur serveur." });
+    }
+    if (!user) {
+      return res.status(404).json({ is_connected: false, message: "Utilisateur non trouvé." });
+    }
+    bcrypt.compare(psw, user.psw, (err, result) => {
+      if (result) {
+        // Inclure l'email, le username et le firstname dans la réponse
+        res.json({
+          is_connected: true,
+          message: "Connexion réussie.",
+          email: user.email,
+          username: user.username,
+          firstname: user.firstname,
+          is_admin: user.is_admin
+          
+        });
+      } else {
+        res.status(401).json({ is_connected: false, message: "Mot de passe incorrect." });
+      }
+    });
+  });
+});
+app.put('/updateUser/:username', (req, res) => {
+  const { username } = req.params; // Obtention du username depuis les paramètres de la route
+  const { email, psw, firstname, lastname, newUsername } = req.body;
+
+  // Hacher le mot de passe s'il est fourni dans la requête
+  const processPassword = (callback) => {
+    if (psw) {
+      bcrypt.hash(psw, saltRounds, (err, hash) => {
+        if (err) {
+          console.error('Erreur lors du hachage du mot de passe:', err.message);
+          return res.status(500).send("Erreur lors de la mise à jour du mot de passe.");
+        }
+        callback(hash); // Exécute la mise à jour avec le mot de passe haché
+      });
+    } else {
+      callback(null); // Passe null si aucun nouveau mot de passe n'est fourni
+    }
+  };
+
+  processPassword((hashedPsw) => {
+    let sql = `UPDATE utilisateurs SET 
+                email = ?, 
+                firstname = ?, 
+                lastname = ?, 
+                username = ?` +
+                (hashedPsw ? `, psw = ? ` : '') +
+                `WHERE username = ?`;
+    let params = hashedPsw ? 
+                  [email, firstname, lastname, newUsername || username, hashedPsw, username] :
+                  [email, firstname, lastname, newUsername || username, username];
+
+    db.run(sql, params, function(err) {
+      if (err) {
+        console.error('Erreur lors de la mise à jour de l’utilisateur:', err.message);
+        return res.status(500).send("Erreur lors de la mise à jour de l'utilisateur.");
+      }
+      if (this.changes > 0) {
+        res.send(`Utilisateur ${username} mis à jour avec succès.`);
+      } else {
+        res.status(404).send("Utilisateur non trouvé.");
+      }
+    });
+  });
+});
+
+app.post('/addUser', (req, res) => {
+  const { email, psw, firstname, lastname, username, is_admin } = req.body;
+  ajouterUtilisateur({ email, psw, firstname, lastname, username, is_admin }, (err, user) => {
+    if (err) {
+      console.error('Erreur lors de l\'ajout de l\'utilisateur:', err.message);
+      res.status(500).send("Erreur lors de l'ajout de l'utilisateur.");
+    } else {
+      console.log(`Utilisateur ajouté avec succès: ${user.userId}`);
+      res.status(201).send(`Utilisateur ajouté avec succès avec l'ID ${user.userId}`);
+    }
+  });
+});
+
+app.delete('/deleteUser/:username', (req, res) => {
+  const { username } = req.params;
+  db.run(`DELETE FROM utilisateurs WHERE username = ?`, [username], function(err) {
+    if (err) {
+      return res.status(500).send("Erreur lors de la suppression de l'utilisateur.");
+    }
+    if (this.changes > 0) {
+      res.send("Utilisateur supprimé avec succès.");
+    } else {
+      res.status(404).send("Utilisateur non trouvé.");
+    }
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Serveur démarré sur http://localhost:${port}`);
