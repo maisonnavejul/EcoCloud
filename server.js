@@ -34,6 +34,52 @@ app.post('/login', async (req, res) => {
       }
   }
 });
+app.put('/updateUser/:username', async (req, res) => {
+  const { username } = req.params;
+  try {
+      // Transmettre la demande de mise à jour au serveur EcoCloud
+      const response = await axios.put(`${ECO_CLOUD_URL}/updateUser/${username}`, req.body);
+      // Renvoyer la réponse du serveur EcoCloud au client
+      res.send(response.data);
+  } catch (error) {
+      if (error.response) {
+          // Renvoyer les erreurs du serveur EcoCloud au client
+          res.status(error.response.status).send(error.response.data);
+      } else {
+          console.error('Erreur lors de la connexion au serveur EcoCloud:', error.message);
+          res.status(500).send('Erreur de connexion au serveur EcoCloud');
+      }
+  }
+});
+app.post('/addUser', async (req, res) => {
+  try {
+      const response = await axios.post(`${urlngrok}/addUser`, req.body);
+      res.send(response.data);
+  } catch (error) {
+      if (error.response) {
+          res.status(error.response.status).send(error.response.data);
+      } else {
+          console.error('Erreur de connexion avec le serveur EcoCloud :', error.message);
+          res.status(500).send('Erreur de connexion avec le serveur EcoCloud');
+      }
+  }
+});
+
+app.delete('/deleteUser/:username', async (req, res) => {
+  const { username } = req.params;
+  try {
+      const response = await axios.delete(`${urlngrok}/deleteUser/${username}`);
+      res.send(response.data);
+  } catch (error) {
+      if (error.response) {
+          res.status(error.response.status).send(error.response.data);
+      } else {
+          console.error('Erreur de connexion avec le serveur EcoCloud :', error.message);
+          res.status(500).send('Erreur de connexion avec le serveur EcoCloud');
+      }
+  }
+});
+
 app.post('/upload', upload.single('file'), async (req, res) => {
   const { resumableIdentifier, resumableFilename, resumableChunkNumber, resumableTotalChunks } = req.body;
 
