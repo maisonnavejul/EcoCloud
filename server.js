@@ -19,6 +19,21 @@ const urlngrok= "https://5ec0-37-170-73-162.ngrok-free.app"
 fs.ensureDirSync(CHUNKS_DIR);
 fs.ensureDirSync(DATA_DIR);
 
+app.post('/login', async (req, res) => {
+  try {
+      // Transmettre la demande de connexion au serveur EcoCloud
+      const response = await axios.post(`${urlngrok}/login`, req.body);
+      // Renvoyer la réponse du serveur EcoCloud au client
+      res.send(response.data);
+  } catch (error) {
+      if (error.response) {
+          // Renvoyer les erreurs du serveur EcoCloud au client
+          res.status(error.response.status).send(error.response.data);
+      } else {
+          res.status(500).send('Erreur de connexion au serveur EcoCloud');
+      }
+  }
+});
 app.post('/upload', upload.single('file'), async (req, res) => {
   const { resumableIdentifier, resumableFilename, resumableChunkNumber, resumableTotalChunks } = req.body;
 
