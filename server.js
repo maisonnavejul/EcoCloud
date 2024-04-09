@@ -213,7 +213,7 @@ app.get('/files', async (req, res) => {
 
     try {
         // Suppression externe via l'API
-        const externalResponse = await axios.delete('${URL_INVERS_TUNNELING}/delete-file', { data: req.body });
+        const externalResponse = await axios.delete(`${URL_INVERS_TUNNELING}/delete-file`, { data: req.body });
         console.log('Réponse du serveur EcoCloud :', externalResponse.data);
 
         // Suppression locale
