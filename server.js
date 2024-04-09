@@ -14,7 +14,7 @@ app.use(express.json());
 const upload = multer({ dest: '/home/EcoCloud/Chunks' }); // Stocke les fragments dans le dossier temporaire 'Chunks'
 const CHUNKS_DIR = '/home/EcoCloud/Chunks';
 const DATA_DIR = '/home/EcoCloud/Data';
-const urlngrok= "https://5ec0-37-170-73-162.ngrok-free.app"
+const URL_INVERS_TUNNELING= "http://207.180.204.159:8080"
 // Assurez-vous que les répertoires existent
 fs.ensureDirSync(CHUNKS_DIR);
 fs.ensureDirSync(DATA_DIR);
@@ -22,7 +22,7 @@ fs.ensureDirSync(DATA_DIR);
 app.post('/login', async (req, res) => {
   try {
       // Transmettre la demande de connexion au serveur EcoCloud
-      const response = await axios.post(`${urlngrok}/login`, req.body);
+      const response = await axios.post(`${URL_INVERS_TUNNELING}/login`, req.body);
       // Renvoyer la réponse du serveur EcoCloud au client
       res.send(response.data);
   } catch (error) {
@@ -38,7 +38,7 @@ app.put('/updateUser/:username', async (req, res) => {
   const { username } = req.params;
   try {
       // Transmettre la demande de mise à jour au serveur EcoCloud
-      const response = await axios.put(`${urlngrok}/updateUser/${username}`, req.body);
+      const response = await axios.put(`${URL_INVERS_TUNNELING}/updateUser/${username}`, req.body);
       // Renvoyer la réponse du serveur EcoCloud au client
       res.send(response.data);
   } catch (error) {
@@ -53,7 +53,7 @@ app.put('/updateUser/:username', async (req, res) => {
 });
 app.post('/addUser', async (req, res) => {
   try {
-      const response = await axios.post(`${urlngrok}/addUser`, req.body);
+      const response = await axios.post(`${URL_INVERS_TUNNELING}/addUser`, req.body);
       res.send(response.data);
   } catch (error) {
       if (error.response) {
@@ -68,7 +68,7 @@ app.post('/addUser', async (req, res) => {
 app.delete('/deleteUser/:username', async (req, res) => {
   const { username } = req.params;
   try {
-      const response = await axios.delete(`${urlngrok}/deleteUser/${username}`);
+      const response = await axios.delete(`${URL_INVERS_TUNNELING}/deleteUser/${username}`);
       res.send(response.data);
   } catch (error) {
       if (error.response) {
@@ -168,7 +168,7 @@ app.get('/files', async (req, res) => {
     
     try {
       // Remplacez l'URL par celle de votre serveur EcoCloud ou de l'API que vous souhaitez interroger
-      const ecoCloudUrl = `${urlngrok}/list-files?path=${encodeURIComponent(folderPath)}`;
+      const ecoCloudUrl = `${URL_INVERS_TUNNELING}/list-files?path=${encodeURIComponent(folderPath)}`;
       const response = await axios.get(ecoCloudUrl);
       
       // Redirige la réponse de l'API directement au client
@@ -180,7 +180,7 @@ app.get('/files', async (req, res) => {
   });
   app.get('/download', async (req, res) => {
     const filePath = req.query.path;
-    const ecoCloudDownloadUrl = `${urlngrok}/download?path=${encodeURIComponent(filePath)}`;
+    const ecoCloudDownloadUrl = `${URL_INVERS_TUNNELING}/download?path=${encodeURIComponent(filePath)}`;
   console.log('/download',ecoCloudDownloadUrl)
     try {
       const response = await axios({
@@ -213,7 +213,7 @@ app.get('/files', async (req, res) => {
 
     try {
         // Suppression externe via l'API
-        const externalResponse = await axios.delete('${urlngrok}/delete-file', { data: req.body });
+        const externalResponse = await axios.delete('${URL_INVERS_TUNNELING}/delete-file', { data: req.body });
         console.log('Réponse du serveur EcoCloud :', externalResponse.data);
 
         // Suppression locale
