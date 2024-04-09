@@ -14,7 +14,7 @@ app.use(express.json());
 const upload = multer({ dest: '/home/EcoCloud/Chunks' }); // Stocke les fragments dans le dossier temporaire 'Chunks'
 const CHUNKS_DIR = '/home/EcoCloud/Chunks';
 const DATA_DIR = '/home/EcoCloud/Data';
-
+const urlngrok= "https://5ec0-37-170-73-162.ngrok-free.app"
 // Assurez-vous que les répertoires existent
 fs.ensureDirSync(CHUNKS_DIR);
 fs.ensureDirSync(DATA_DIR);
@@ -107,7 +107,7 @@ app.get('/files', async (req, res) => {
     
     try {
       // Remplacez l'URL par celle de votre serveur EcoCloud ou de l'API que vous souhaitez interroger
-      const ecoCloudUrl = `https://739c-185-223-151-250.ngrok-free.app/list-files?path=${encodeURIComponent(folderPath)}`;
+      const ecoCloudUrl = `${urlngrok}/list-files?path=${encodeURIComponent(folderPath)}`;
       const response = await axios.get(ecoCloudUrl);
       
       // Redirige la réponse de l'API directement au client
@@ -119,7 +119,7 @@ app.get('/files', async (req, res) => {
   });
   app.get('/download', async (req, res) => {
     const filePath = req.query.path;
-    const ecoCloudDownloadUrl = `https://739c-185-223-151-250.ngrok-free.app/download?path=${encodeURIComponent(filePath)}`;
+    const ecoCloudDownloadUrl = `${urlngrok}/download?path=${encodeURIComponent(filePath)}`;
   console.log('/download',ecoCloudDownloadUrl)
     try {
       const response = await axios({
@@ -152,7 +152,7 @@ app.get('/files', async (req, res) => {
 
     try {
         // Suppression externe via l'API
-        const externalResponse = await axios.delete('https://739c-185-223-151-250.ngrok-free.app/delete-file', { data: req.body });
+        const externalResponse = await axios.delete('${urlngrok}/delete-file', { data: req.body });
         console.log('Réponse du serveur EcoCloud :', externalResponse.data);
 
         // Suppression locale
