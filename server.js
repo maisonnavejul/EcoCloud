@@ -38,7 +38,7 @@ app.put('/updateUser/:username', async (req, res) => {
   const { username } = req.params;
   try {
       // Transmettre la demande de mise à jour au serveur EcoCloud
-      const response = await axios.put(`${ECO_CLOUD_URL}/updateUser/${username}`, req.body);
+      const response = await axios.put(`${urlngrok}/updateUser/${username}`, req.body);
       // Renvoyer la réponse du serveur EcoCloud au client
       res.send(response.data);
   } catch (error) {
