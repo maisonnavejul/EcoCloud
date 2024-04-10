@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const SftpClient = require('ssh2-sftp-client');
 const fs = require('fs-extra');
+const multer = require('multer');
 const path = require('path');
 const AdmZip = require('adm-zip');
 const { Console } = require('console');
@@ -11,6 +12,14 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 const db = new sqlite3.Database('./database.db');
+// Définir les répertoires
+const BASE_DIR = path.resolve(__dirname, '..');
+const CHUNKS_DIR = path.join(BASE_DIR, 'EcoCloud', 'Chunks');
+const SFTPFILES_DIR = path.join(BASE_DIR, 'EcoCloud', 'SFTPfiles');
+
+// Configurer multer pour stocker les fragments de fichiers
+const upload = multer({ dest: CHUNKS_DIR });
+
 
 const app = express();
 app.use(bodyParser.json());
@@ -160,6 +169,84 @@ app.get('/list-files', async (req, res) => {
       res.json(response);
   });
 });
+
+// Route pour gérer l'upload des fichiers
+app.post('/upload', upload.single('file'), async (req, res) => {
+  const { resumableIdentifier, resumableFilename, resumableChunkNumber, resumableTotalChunks } = req.body;
+
+  console.log(`Réception du fragment : ${resumableChunkNumber} pour le fichier ${resumableFilename}`);
+
+  if (!resumableIdentifier || !resumableFilename || !resumableChunkNumber || !resumableTotalChunks) {
+      console.error('Paramètres manquants');
+      return res.status(400).send('Missing parameters');
+  }
+
+  const tempDirPath = path.join(CHUNKS_DIR, resumableIdentifier);
+  fs.ensureDirSync(tempDirPath);
+
+const filePath = path.join(SFTPFILES_DIR, resumableFilename);
+const chunkPath = req.file.path;
+
+const tempChunkPath = path.join(tempDirPath, `${resumableChunkNumber}`);
+try {
+    await fs.move(chunkPath, tempChunkPath, { overwrite: true });
+
+    const isComplete = await checkIfAllChunksReceived(tempDirPath, resumableTotalChunks);
+
+    if (isComplete) {
+        console.log(`Tous les fragments reçus pour ${resumableFilename}. Début du réassemblage.`);
+        await reassembleFile(tempDirPath, resumableTotalChunks, filePath, resumableFilename);
+        console.log('Fichier réassemblé avec succès.');
+        res.send({ message: 'Fichier téléversé et réassemblé avec succès' });
+    } else {
+        res.send({ message: 'Fragment reçu' });
+    }
+} catch (error) {
+    console.error('Erreur lors du traitement du fragment ou de la réassemblage :', error);
+    res.status(500).send('Erreur lors du traitement du fichier');
+}
+});
+
+async function checkIfAllChunksReceived(dirPath, totalChunks) {
+const files = await fs.readdir(dirPath);
+return files.length === parseInt(totalChunks, 10);
+}
+
+async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename) {
+  try {
+    const writeStream = fs.createWriteStream(finalPath);
+    for (let i = 1; i <= totalChunks; i++) {
+      const chunkPath = path.join(dirPath, `${i}`);
+      const chunk = await fs.readFile(chunkPath);
+      writeStream.write(chunk);
+      await fs.unlink(chunkPath); // Supprimer le fragment après l'avoir ajouté
+    }
+    writeStream.end();
+
+    writeStream.on('finish', async () => {
+      // Le fichier est maintenant réassemblé. Prochaine étape: le dézipper
+
+      // Déterminer le chemin final du dossier où les fichiers seront décompressés
+      const unzipDestination = path.join(SFTPFILES_DIR, path.basename(originalFilename, '.zip'));
+
+      // Décompresser le fichier .zip
+      const zip = new AdmZip(finalPath);
+      zip.extractAllTo(unzipDestination, true);
+      console.log(`Fichier ${originalFilename} décompressé avec succès dans ${unzipDestination}.`);
+
+      // Optionnel: Supprimer le fichier .zip après la décompression si vous ne souhaitez pas le conserver
+      await fs.unlink(finalPath);
+      console.log(`Fichier .zip original ${originalFilename} supprimé après décompression.`);
+
+      // A ce stade, le fichier est décompressé dans SFTPFILES_DIR, et le .zip est supprimé
+      // Vous pouvez maintenant répondre à la requête HTTP pour signaler le succès
+    });
+  } catch (error) {
+    console.error(`Erreur lors de la réassemblage et décompression du fichier : ${error}`);
+    throw error; // Propage l'erreur pour une gestion ultérieure
+  }
+}
+
 
 app.get('/download', (req, res) => {
   const filePath = req.query.path;
