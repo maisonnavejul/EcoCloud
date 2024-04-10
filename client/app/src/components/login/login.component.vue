@@ -103,9 +103,11 @@ export default {
                 this.login_failed = true;
             } else {
                 this.login_failed = false;
+                console.log('RES', res);
                 this.$store.dispatch('login', res)
                     .then(() => {
                         const next_route = !res.email ? '/register' : '/';
+                        console.log('USER', this.$store.state.user);
                         this.$router.push(next_route);
                     })
                     .catch((error) => {
@@ -199,5 +201,6 @@ export default {
     height: 18%;
     width: 60%;
     margin-top: 10%;
+    color: white;
 }
 </style>

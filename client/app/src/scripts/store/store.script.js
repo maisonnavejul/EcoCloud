@@ -2,10 +2,25 @@ import { createStore } from 'vuex';
 
 export default createStore({
     state: {
-        is_offline: false, // set true if backend server is offline
+        is_offline: true, // set true if backend server is offline
         is_logged_in: false,
         user: null,
         cwd: '/',
+    },
+
+    getters: {
+        get_login_state(state) {
+            return state.login;
+        },
+
+        get_user_state(state) {
+            return state.user;
+        },
+
+        get_cwd_state(state) {
+            return state.cwd
+        }
+
     },
 
     mutations: {
@@ -21,11 +36,7 @@ export default createStore({
             state.cwd = new_path;
         },
         GET_USER(state) {
-            if (state.is_logged_in) {
-                return state.user;
-            } else {
-                return null;
-            }
+            return this.getters.get_user_state;
         }
 
     },

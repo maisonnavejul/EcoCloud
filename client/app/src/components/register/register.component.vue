@@ -40,9 +40,7 @@
 </template>
 
 <script>
-const data = {
-    message: 'Registration successful'
-};
+const data = 'Le compte a été mis à jour avec succès.';
 
 export default {
     name: 'Register',
@@ -72,6 +70,11 @@ export default {
 
         async register() {
             // PUT 10.222.7.145:3000/updateUser
+            if (this.$store.state.is_offline) {
+                this.offline_register();
+                return;
+            }
+
             if (this.check_form()) {
                 this.register_failed = true;
                 console.log('Please fill in all fields');
@@ -89,8 +92,8 @@ export default {
                 firstname: this.firstname ? this.firstname : null,
                 lastname: this.lastname ? this.lastname : null
             });
-            const url_user = this.$store.dispatch("get_user").username;
-            const req = new Request(`http://207.180.204.159:8080/updateUser/${url_user}`, {
+            const username = this.$store.getters.get_user_state.username;
+            const req = new Request(`http://207.180.204.159:8080/updateUser/${username}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,5 +206,6 @@ export default {
     height: 10%;
     width: 60%;
     margin-top: 10%;
+    color: white;
 }
 </style>

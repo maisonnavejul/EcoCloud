@@ -144,7 +144,7 @@ export default {
     setUpResumable() {
       if (!this.resumable) {
         this.resumable = new Resumable({
-          target: 'http://207.180.204.159:8080/upload',
+          target: 'http://207.180.204.159:3000/upload',
           chunkSize: 2 * 1024 * 1024,
           testChunks: false,
           throttleProgressCallbacks: 1,
