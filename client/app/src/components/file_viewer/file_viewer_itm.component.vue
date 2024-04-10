@@ -43,7 +43,7 @@ export default {
             required: true
         },
         created_on: {
-            type: String,
+            type: String || Date,
             required: true
         }
     },
@@ -104,7 +104,8 @@ export default {
         },
 
         format_date(dateString) {
-            const date = new Date(this.created_on);
+            const date = typeof this.created_on === 'string' ? new Date(this.created_on) : this.created_on
+            
             return date.toLocaleDateString("fr-FR");
         },
 

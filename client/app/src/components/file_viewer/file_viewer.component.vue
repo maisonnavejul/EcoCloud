@@ -7,7 +7,9 @@
                     <th class="head_checkbox">
                         <input type="checkbox" @click="check_all"/>
                     </th>
-                    <th class="head_type" @click="sort_column('type')">Type</th>
+                    <th class="head_type" @click="sort_column('type')">
+                        Type
+                    </th>
                     <th class="head_name" @click="sort_column('name')">Name</th>
                     <th class="head_size" @click="sort_column('size')">Size</th>
                     <th class="head_created_on" @click="sort_column('created_on')">Created On</th>
@@ -113,7 +115,7 @@ export default {
 
     methods: {
         async get_files() {
-            if (this.$store.state.is_offline) return this.get_files_offline(); // TODO: For offline mode
+            if (this.$store.state.is_offline) return this.get_files_offline();
 
             try {
                 const path = this.$store.state.cwd;
@@ -194,17 +196,20 @@ export default {
                     this.sort_by_name();
                     break;
                 case 'type':
+                    this.sort_by_type();
                     break;
                 case 'size':
                     this.sort_by_size();
                     break;
                 case 'created_on':
+                    this.sort_by_date();
                     break;
             }
 
         },
 
         sort_by_name() {
+            console.log('sort by name');
             if (this.sort_order === 'asc') {
                 this.files.sort((a, b) => a.name.localeCompare(b.name));
                 this.sort_order = 'desc';
@@ -229,13 +234,67 @@ export default {
             }
 
             this.files = [...folders, ...files];
-
         },
 
+        sort_by_type() {
+            let folders = this.files.filter(file => file.type === 'folder');
+            let files = this.files.filter(file => file.type === 'file');
+
+            if (this.sort_order === 'asc') {
+                folders.sort((a, b) => {
+                    const ext_a = a.name.split('.').pop();
+                    const ext_b = b.name.split('.').pop();
+                    return ext_a.localeCompare(ext_b);
+                })
+                files.sort((a, b) => {
+                    const ext_a = a.name.split('.').pop();
+                    const ext_b = b.name.split('.').pop();
+                    return ext_a.localeCompare(ext_b);
+                });
+                this.sort_order = 'desc';
+            } else {
+                folders.sort((a, b) => {
+                    const ext_a = a.name.split('.').pop();
+                    const ext_b = b.name.split('.').pop();
+                    return ext_b.localeCompare(ext_a);
+                })
+                files.sort((a, b) => {
+                    const ext_a = a.name.split('.').pop();
+                    const ext_b = b.name.split('.').pop();
+                    return ext_b.localeCompare(ext_a);
+                });
+                this.sort_order = 'asc';
+            }
+
+            this.files = [...folders, ...files];
+        },
+
+        sort_by_date() {
+            if (this.sort_order === 'asc') {
+                console.log('asc');
+                this.files.sort((a, b) => {
+                    const da = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt;
+                    const db = typeof b.createdAt === 'string'? new Date(b.createdAt) : b.createdAt;
+                    const diff = da - db;
+                    return diff;
+                });
+                this.sort_order = 'desc';
+            } else {
+                console.log('desc');
+                this.files.sort((a, b) => {
+                    const da = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt;
+                    const db = typeof b.createdAt === 'string' ? new Date(b.createdAt) : b.createdAt;
+                    const diff = db - da;
+                    return diff;
+                });
+                this.sort_order = 'asc';
+            }
+        },
     },
 
     mounted() {
         console.log('mounted');
+        this.sort_by_name();
     }
 }
 </script>
