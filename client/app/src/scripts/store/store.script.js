@@ -20,6 +20,13 @@ export default createStore({
         CHANGEDIR(state, new_path) {
             state.cwd = new_path;
         },
+        GET_USER(state) {
+            if (state.is_logged_in) {
+                return state.user;
+            } else {
+                return null;
+            }
+        }
 
     },
 
@@ -33,5 +40,8 @@ export default createStore({
         change_dir({ commit }, new_path) {
             commit('CHANGEDIR', new_path);
         },
+        get_user({ commit }) {
+            commit('GET_USER');
+        }
     },
 });

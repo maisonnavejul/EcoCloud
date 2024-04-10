@@ -89,8 +89,8 @@ export default {
                 firstname: this.firstname ? this.firstname : null,
                 lastname: this.lastname ? this.lastname : null
             });
-
-            const req = new Request(`http://207.180.204.159:8080/updateUser/${this.$store.state.user.username}`, {
+            const url_user = this.$store.dispatch("get_user").username;
+            const req = new Request(`http://207.180.204.159:8080/updateUser/${url_user}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
