@@ -80,7 +80,7 @@ app.delete('/deleteUser/:username', async (req, res) => {
   }
 });
 
-app.post('/upload', upload.single('file'), async (req, res) => {
+app.post('/upload-save', upload.single('file'), async (req, res) => {
   const { resumableIdentifier, resumableFilename, resumableChunkNumber, resumableTotalChunks } = req.body;
 
   console.log(`Réception du fragment : ${resumableChunkNumber} pour le fichier ${resumableFilename}`);
