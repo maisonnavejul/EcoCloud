@@ -5,7 +5,7 @@
             <div class="register_failed" v-if="register_failed">
                 <p>Une information d'enregistrement est incorrecte</p>
             </div>
-            <form class="register_form" @submit.prevent="offline_register">
+            <form class="register_form" @submit.prevent="register">
                 <input type="text" 
                     name="username" 
                     placeholder="Username" 
@@ -82,29 +82,32 @@ export default {
 
             console.log('Register submitted successfully');
 
-            const req = new Request('http://10.224.0.83:3000/updateUser', {
+            const body = JSON.stringify({
+                username: this.username,
+                password: this.password,
+                email: this.email ? this.email : null,
+                firstname: this.firstname ? this.firstname : null,
+                lastname: this.lastname ? this.lastname : null
+            });
+
+            const req = new Request(`http://207.180.204.159:8080/updateUser/${this.$store.state.user.username}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    username: this.username,
-                    password: this.password,
-                    email: this.email ? this.email : null,
-                    firstname: this.firstname ? this.firstname : null,
-                    lastname: this.lastname ? this.lastname : null
-                }),
+                body: body,
             });
-
+            
+            console.log(body)
+            console.log(req)
             const response = await fetch(req);
-            const data = await response.json();
+            const data = await response.text();
             console.log(data);
             this.parse_res(data);
-
         },
 
         parse_res(data) {
-            if (data.message) {
+            if (data.includes('mis à jour avec succès')) {
                 console.log('Registration successful');
                 this.$router.push('/');
             } else {

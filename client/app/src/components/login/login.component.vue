@@ -5,7 +5,7 @@
             <div class="login_failed" v-if="login_failed">
                 <p>Une information de connexion est incorrecte</p>
             </div>
-            <form class="login_form" @submit.prevent="offline_login">
+            <form class="login_form" @submit.prevent="login">
                 <input type="text" 
                     name="username" 
                     placeholder="Username" 
@@ -64,22 +64,28 @@ export default {
         },
         async login() {
             // POST 10.222.7.145:3000/login
+            if (this.$store.state.is_offline) {
+                this.offline_login();
+                return;
+            }
+
             if (this.check_form()) {
                 console.log('Please fill in all fields');
                 return;
             } 
 
             console.log("login form submitted");
+            const body = JSON.stringify({
+                    username: this.username,
+                    psw: this.password
+                });
             
-            const req = new Request('http://10.224.0.83:3000/login', {
+            const req = new Request('http://207.180.204.159:8080/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    username: this.username,
-                    psw: this.password
-                }),
+                body: body,
             });
 
             const response = await fetch(req);
