@@ -20,6 +20,8 @@
 
 <script>
 import UserItem from '../user_viewer/user_viewer.component.vue';
+import { get_user_list } from '../../assets/datasets/user.helper';
+
 export default {
     name: 'Admin',
 
@@ -34,7 +36,16 @@ export default {
     },
 
     methods: {
+        offline_user_list() {
+            this.user_list = get_user_list();
+        },
+
         async get_user_list() {
+            if (this.$store.state.is_offline) {
+                this.offline_user_list();
+                return;
+            }
+
             const response = await fetch('http://207.180.204.159:8080/list-users');
 
             const data = await response.json();

@@ -38,63 +38,9 @@
 <script>
 import FileViewerItem from './file_viewer_itm.component.vue';
 import PathViewer from './path_viewer.component.vue';
+import file_dataset from '../../assets/datasets/file.dataset';
 
-const tmp_files = [
-    {
-        name: 'Grp2_6_fix_Path_traversal.patch',
-        type: 'file',
-        size: 3248,
-        createdAt: new Date('2022-01-01T00:00:00'),
-    },
-    {
-        name: 'Grp2_6_Path_traversal.pdf',
-        type: 'file',
-        size: 12,
-        createdAt: new Date('2022-02-01T00:00:00'),
-    },
-    {
-        name: 'GRP2_7_Faille_XSS.docx',
-        type: 'file',
-        size: 1480673,
-        createdAt: new Date('2022-03-01T00:00:00'),
-    },
-    {
-        name: 'Folder 1',
-        type: 'folder',
-        size: 12788,
-        createdAt: new Date('2022-04-01T00:00:00'),
-    },
-    {
-        name: 'Folder 2',
-        type: 'folder',
-        size: 145,
-        createdAt: new Date('2022-05-01T00:00:00'),
-    },
-    {
-        name: 'Grp2_6_fix_Path_traversal.zip',
-        type: 'folder',
-        size: 32,
-        createdAt: new Date('2022-01-01T00:00:00'),
-    },
-    {
-        name: 'ecocloud.pptx',
-        type: 'file',
-        size: 1053000,
-        createdAt: new Date('2022-01-01T00:00:00'),
-    },
-    {
-        name: 'ecocloud_logo.svg',
-        type: 'file',
-        size: 12398723,
-        createdAt: new Date('2024-04-06T13:45:57'),
-    },
-    {
-        name: 'ecocloud_logo.png',
-        type: 'file',
-        size: 1239872,
-        createdAt: new Date('2024-04-06T13:46:37'),
-    },
-];
+const tmp_files = file_dataset;
 
 export default {
     name: 'FileViewer',

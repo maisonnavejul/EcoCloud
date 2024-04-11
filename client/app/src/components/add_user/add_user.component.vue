@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { register } from '../../assets/datasets/user.helper';
 
 export default {
     name: 'AddUser',
@@ -67,7 +68,31 @@ export default {
     },
 
     methods: {
+        offline_add_user() {
+            if (this.check_form()) {
+                this.add_user_failed = true;
+                console.log('Please fill in password, username and email');
+                return;
+            } 
+
+            console.log('Add User form submitted successfully');
+            res = register(
+                this.firstname,
+                this.lastname,
+                this.email,
+                this.username,
+                this.password,
+                0,
+            )
+            this.parse_res(res);
+        },
+
         async add_user() {
+            if (this.$store.state.is_offline) {
+                this.offline_add_user()
+                return;
+            }
+
             if (this.check_form()) {
                 this.add_user_failed = true;
                 console.log('Please fill in password, username and email');
