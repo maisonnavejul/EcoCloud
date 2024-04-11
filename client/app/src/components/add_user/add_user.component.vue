@@ -1,57 +1,60 @@
 <template>
-    <div class="register_container">
-        <div class="register">
-            <h2 class="register_title">Welcome</h2>
-            <div class="register_failed" v-if="register_failed">
+    <div class="add_user_container">
+        <div class="add_user">
+            <h2 class="add_user_title">Add a new user</h2>
+            <div class="add_user_failed" v-if="add_user_failed">
                 <p>Une information d'enregistrement est incorrecte</p>
             </div>
-            <form class="register_form" @submit.prevent="register">
+            <form class="add_user_form" @submit.prevent="add_user">
                 <input type="text" 
                     name="username" 
                     placeholder="Username" 
-                    class="register_username"
+                    class="add_user_username"
                     v-model="username"/>
                 <input type="password" 
                     name="password" 
                     placeholder="Password" 
-                    class="register_username"
+                    class="add_user_username"
                     v-model="password"/>
                 <input type="text"
                     name="email"
                     placeholder="youremail@example.com"
-                    class="register_email"
+                    class="add_user_email"
                     v-model="email"/>
                 <input type="text"
                     name="firstname"
                     placeholder="First Name"
-                    class="register_firstname"
+                    class="add_user_firstname"
                     v-model="firstname"/>
                 <input type="text"
                     name="lastname"
                     placeholder="Last Name"
-                    class="register_lastname"
+                    class="add_user_lastname"
                     v-model="lastname"/>            
                 <button type="submit" 
                         name="button" 
-                        class="register_button">Register</button>
+                        class="add_user_button">{{button_text? button_text: 'Add User'}}</button>
             </form>
         </div>
     </div>
 </template>
 
 <script>
-const data = 'Le compte a été mis à jour avec succès.';
 
 export default {
-    name: 'Register',
+    name: 'AddUser',
 
     props: {
-        uname: {
-            type: String,
+        callback: {
+            type: Function,
             required: false
         },
+        button_text: {
+            type: String,
+            required: false
+        }
     },
-
+    
     data() {
         return {
             username: "",
@@ -59,91 +62,67 @@ export default {
             email: "",
             firstname: "",
             lastname: "",
-            register_failed: false,
+            add_user_failed: false,
         }
     },
 
     methods: {
-        offline_register() {
+        async add_user() {
             if (this.check_form()) {
-                this.register_failed = true;
-                console.log('Please fill in all fields');
-                return;
-            } 
-            this.register_failed = false;
-
-            console.log('Register successful');
-            this.parse_res(data);
-        },
-
-        async register() {
-            // PUT 10.222.7.145:3000/updateUser
-            if (this.$store.state.is_offline) {
-                this.offline_register();
+                this.add_user_failed = true;
+                console.log('Please fill in password, username and email');
                 return;
             }
 
-            if (this.check_form()) {
-                this.register_failed = true;
-                console.log('Please fill in all fields');
-                return;
-            }
+            this.add_user_failed = false;
 
-            this.register_failed = false;
-
-            console.log('Register submitted successfully');
+            console.log('Add User form  submitted successfully');
 
             const body = JSON.stringify({
                 username: this.username,
-                password: this.password,
-                email: this.email ? this.email : null,
-                firstname: this.firstname ? this.firstname : null,
-                lastname: this.lastname ? this.lastname : null
+                psw: this.password,
+                email: this.email,
+                firstname: this.firstname ? this.firstname : "",
+                lastname: this.lastname ? this.lastname : "",
+                is_admin: false,
             });
-            
-            let username = this.$store.getters.get_user_state.username;
-            if (this.$props.uname) {
-                username = this.$props.username;
-            }
 
-            const req = new Request(`http://207.180.204.159:8080/updateUser/${username}`, {
-                method: 'PUT',
+            const req = new Request('http://207.180.204.159:8080/addUser', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: body,
             });
-            
-            console.log(body)
-            console.log(req)
+            console.log('Request: ', req);
+            console.log('Body: ', body);
             const response = await fetch(req);
             const data = await response.text();
-            console.log(data);
             this.parse_res(data);
+            console.log('Data: ', data);
         },
 
-        parse_res(data) {
-            if (data.includes('mis à jour avec succès')) {
-                console.log('Registration successful');
-                this.$router.push('/');
+        parse_res(response) {
+            if (response.includes('Utilisateur ajouté avec succès')) {
+                this.$router.push('/admin');
             } else {
-                console.log('Registration failed');
+                this.username = '';  
+                this.password = '';
+                this.email = '';
+                this.firstname = '';
+                this.lastname = '';
             }
         },
 
         check_form() {
-            return !this.username || !this.password;
+            return !this.username || !this.password || !this.email;
         }
-    },
-
-    mounted() {
-        console.log('Register.vue mounted');
     }
 }
 </script>
 
 <style>
-.register_container {
+.add_user_container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -151,7 +130,7 @@ export default {
     width: 100%;
 }
 
-.register {
+.add_user {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -164,13 +143,13 @@ export default {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
 }
 
-.register_title {
+.add_user_title {
     font-size: 25px;
     margin-top: 5%;
     margin-bottom: 7%;
 }
 
-.register_form {
+.add_user_form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -180,7 +159,7 @@ export default {
     height: 100%;
 }
 
-.register_failed {
+.add_user_failed {
     background-color: rgb(255, 87, 87, 0.6);
     border: 1px solid rgb(143, 55, 55);
     border-radius: 5px;
@@ -194,7 +173,7 @@ export default {
     margin-bottom: 4%;
 }
 
-.register_form > * {
+.add_user_form > * {
     margin-bottom: 1%;
     margin-bottom: 3%;
     width: 100%;
@@ -202,17 +181,17 @@ export default {
     height: 10%;
 }
 
-.register_form > input {
+.add_user_form > input {
     border: 0px;
     border-bottom: 1.2px solid #000000;
     outline: none;
 }
 
-.register_form > input:focus {
+.add_user_form > input:focus {
     border-bottom: 1.2px solid #335145;
 }
 
-.register_button {
+.add_user_button {
     border: 0px;
     border-radius: 5px;
     background-color: #335145;

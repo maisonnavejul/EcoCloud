@@ -1,10 +1,20 @@
 <template>
     <div class="toolbar">
-        <ToolbarItem v-for="item in toolbar_items" 
-                        :name="item.name" 
-                        :callback="item.callback" 
-                        :class="item.class"
-                        :key="item.name"/>
+        <div class="left_toolbar">
+            <ToolbarItem v-for="item in toolbar_items" 
+                            :name="item.name" 
+                            :callback="item.callback" 
+                            :class="item.class"
+                            :key="item.name"/>
+        </div>
+        <div class="admin_toolbar">
+            <ToolbarItem v-if="this.$store.getters.get_user_state.is_admin"
+                         v-for="item in admin_items"
+                            :name="item.name"
+                            :callback="item.callback"
+                            :class="item.class"
+                            :key="item.name"/>
+        </div>
     </div>
 </template>
 
@@ -39,6 +49,13 @@ export default {
                     callback: this.refresh,
                     class: '',
                 },
+            ],
+            admin_items: [
+                {
+                    name: 'Admin',
+                    callback: this.go_admin,
+                    class: '',
+                }
             ]
         }
     },
@@ -57,6 +74,9 @@ export default {
         },
         refresh() {
             this.$emit('refresh');
+        },
+        go_admin() {
+            this.$router.push('/admin');
         }
     },
 }
@@ -66,9 +86,26 @@ export default {
 .toolbar {
     display: flex;
     flex-direction: row;
-    width: 430px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
     margin-bottom: 20px;
 }
+
+.left_toolbar {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    margin-left: 20px;
+}
+
+.admin_toolbar {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    margin-right: 20px;
+}
+
 
 .file_uploader_btn {
     background-color: #335145;

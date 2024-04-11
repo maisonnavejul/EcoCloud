@@ -143,8 +143,13 @@ export default {
     },
     setUpResumable() {
       if (!this.resumable) {
+        const port = this.is_save_checked? '3000' : '8080';
+        const username = this.$store.getters.get_user_state.username;
+        console.log(port);
+        console.log(username);
+        
         this.resumable = new Resumable({
-          target: 'http://207.180.204.159:3000/upload',
+          target: `http://207.180.204.159:${port}/upload/${username}`,
           chunkSize: 2 * 1024 * 1024,
           testChunks: false,
           throttleProgressCallbacks: 1,

@@ -1,7 +1,10 @@
 <template>
     <div class="file_wrapper">
         <PathViewer ref="path_viewer" @parent="handleParent"/>
-        <table class="file_viewer">
+        <div class="no_file_viewer" v-if="this.files.length === 0">  
+            <p>No file uploaded yet</p>
+        </div>
+        <table class="file_viewer" v-if="this.files.length > 0">
             <thead>
                 <tr class="head_row">
                     <th class="head_checkbox">
@@ -118,9 +121,11 @@ export default {
             if (this.$store.state.is_offline) return this.get_files_offline();
 
             try {
+                const username = this.$store.getters.get_user_state.username;
+                console.log(username);
                 const path = this.$store.state.cwd;
                 console.log('PATH', path);
-                const response = await fetch(`http://207.180.204.159:3000/test-recup?path=${encodeURIComponent(path)}`);
+                const response = await fetch(`http://207.180.204.159:8080/list-files/${username}?path=${encodeURIComponent(path)}`);
                 
                 if (!response.ok) throw new Error("Error while fetching files")
                    
