@@ -11,6 +11,13 @@
         <td class="file_itm_name">{{ name }}</td>
         <td class="file_itm_size">{{ size_transform() }}</td>
         <td class="file_itm_created_on">{{ format_date() }}</td>
+        <td class="file_itm_actions" @click="handle_click">
+            <img class="itm_rename_action"
+                 src="../../assets/icons/actions_icons/pencil.png"
+                 alt="rename"
+                 title="Rename File"
+                 @click="rename_itm" />
+        </td>
     </tr>
 </template>
 
@@ -119,6 +126,32 @@ export default {
             }
             const icon_name = this.is_folder(this.type) ? 'src/assets/icons/file_icons/folder.png' : 'src/assets/icons/file_icons/file.png';
             return icon_name;
+        },
+
+        async rename_itm() {
+            const new_name = prompt('Enter new name: ');
+            
+            if (new_name != null) {
+                const old_path = `${this.$store.state.user.username}/${this.$props.path}`
+                const body = JSON.stringify({
+                    newName: new_name,
+                    oldPath: old_path,
+                });
+
+                console.log('BODY', body);
+
+                const req = new Request('http://207.180.204.159:3000/rename-file', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                });
+
+                const res = await fetch(req);
+
+                console.log('RES', res);
+            }
         }
     }
 }
@@ -174,6 +207,13 @@ export default {
 .file_itm_type > img {
     width: 22px;
     height: 22px;
+}
+
+.itm_rename_action {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.8;
 }
 
 </style>

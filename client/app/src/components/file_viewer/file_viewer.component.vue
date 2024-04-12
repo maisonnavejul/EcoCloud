@@ -22,13 +22,14 @@
                 <FileViewerItem v-for="file in files" 
                                 :name="file.name" 
                                 :type="file.type.toLowerCase()"
-                                :path="this.path" 
+                                :path="file.path" 
                                 :size="file.size"
                                 :created_on="file.createdAt"
                                 :key="file.name"
                                 @navigate="handleNavigate"
                                 @check="handleCheck(file)"
                                 @uncheck="handleUncheck(file)"
+                                @refresh="this.$emit('refresh')"
                                 class="viewer_item"/>
             </tbody>
         </table>
@@ -60,9 +61,20 @@ export default {
 
     async created() {
         this.files = await this.get_files();
+        
+        console.log(this.files)
     },
 
     methods: {
+        map_files(files) {
+            return files.map(file => {
+                return {
+                    ...file,
+                    path: `${this.$store.state.cwd}${file.name}`
+                }
+            });
+        },
+
         async get_files() {
             if (this.$store.state.is_offline) return this.get_files_offline();
 
@@ -71,13 +83,20 @@ export default {
                 console.log(username);
                 const path = this.$store.state.cwd;
                 console.log('PATH', path);
-                const response = await fetch(`http://207.180.204.159:8080/list-files/${username}?path=${encodeURIComponent(path)}`);
-                
+
+                const req = new Request(`http://207.180.204.159:8080/list-files/${username}?path=${encodeURIComponent(path)}`) 
+                console.log('GET FILES REQ', req);
+
+                const response = await fetch(req);
+                console.log('GET FILES RESPONSE', response);
+
                 if (!response.ok) throw new Error("Error while fetching files")
                    
                 const json = await response.json();
+                const files = this.map_files(json);
+                console.log('MAPPED FILES', files);
 
-                return json;
+                return files;
 
             } catch (error) {
                 console.error('Erreur lors de la récupération des fichiers:', error);
@@ -89,7 +108,7 @@ export default {
         },
 
         async handleNavigate(path) {
-            const new_path = `${this.$store.state.cwd}/${path}/`;
+            const new_path = `${this.$store.state.cwd}${path}/`;
             this.$store.dispatch('change_dir', new_path);
             this.files = await this.get_files();
         },
