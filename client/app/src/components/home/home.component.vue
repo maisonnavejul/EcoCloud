@@ -5,7 +5,7 @@
                  @delete="handleDelete"
                  @refresh="handleRefresh"/>
         <div class="home_viewer">
-            <FileViewer ref="file_viewer"/>
+            <FileViewer ref="file_viewer" @refresh="handleRefresh"/>
         </div>
         <Modal v-if="is_uploader_mod_open" 
                @close="is_uploader_mod_open=false"

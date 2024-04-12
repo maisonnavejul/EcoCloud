@@ -2,7 +2,10 @@
     <header class="header">
         <div class="header_left">
             <div class="header_logo">
-                <img alt="EcoCloud logo"/>
+                <img alt="EcoCloud logo"
+                     class="header_logo_img"
+                     src="../../assets/logo/ecocloud-no-bg.png"
+                     @click="this.$router.push('/')"/>
             </div>
             <h1 class="header_title">EcoCloud</h1>
         </div>
@@ -47,6 +50,7 @@ export default {
     display: flex;
     flex-direction: row;
     margin-bottom: 2%;
+    margin-top: 7px;
     justify-content: space-between;
     height: 40px;
 }
@@ -67,6 +71,20 @@ export default {
 .header_logo {
     font-size: 12px;
     margin-right: 5px;
+    height: 70px;
+    width: 70px;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+}
+
+.header_logo_img {
+    height: 100%;
+    width: 100%;
+}
+
+.header_logo_img:hover {
+    cursor: pointer;
 }
 
 .header_account_infos {
@@ -75,7 +93,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     max-width: 15%;
-    margin-right: 47px;
+    margin-right: 12px;
 }
 
 .header_account {
