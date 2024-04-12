@@ -162,6 +162,46 @@ app.get('/files', async (req, res) => {
       res.status(500).send('Erreur lors de la récupération des fichiers');
     }
   });
+app.put('/rename-file', async (req, res) => {
+    const { oldPath, newName } = req.body;
+    const DATA_DIR = '/home/EcoCloud/Data'; // Répertoire où les fichiers sont stockés
+    const fullOldPath = path.join(DATA_DIR, oldPath); // Chemin complet de l'ancien fichier
+    const fullNewPath = path.join(DATA_DIR, newName); // Chemin complet du nouveau fichier
+
+    console.log('Tentative de renommage de:', fullOldPath, 'à', fullNewPath);
+
+    try {
+        // Tenter de renommer le fichier à distance en premier
+        await axios.put(`${URL_INVERS_TUNNELING}/rename-file`, {
+            oldPath: oldPath,
+            newName: newName
+        });
+        console.log('Fichier renommé à distance avec succès');
+        
+        // Vérifier si le nouveau nom de fichier existe déjà localement
+        if (await fs.pathExists(fullNewPath)) {
+            console.log('Un fichier avec ce nom existe déjà localement');
+            return res.status(409).send('Un fichier portant ce nom existe déjà localement.');
+        }
+
+        // Tenter de renommer le fichier localement
+        try {
+            await fs.move(fullOldPath, fullNewPath);
+            console.log('Fichier renommé localement avec succès');
+        } catch (localError) {
+            if (localError.code === 'ENOENT') {
+                console.log('Le fichier local n\'existait pas, aucun renommage nécessaire localement.');
+            } else {
+                throw localError; // Relancer l'erreur si ce n'est pas une erreur ENOENT
+            }
+        }
+
+        res.send({ message: 'Fichier renommé avec succès', newPath: path.basename(newName) });
+    } catch (error) {
+        console.error('Erreur lors du renommage du fichier:', error);
+        res.status(500).send('Erreur lors du renommage du fichier');
+    }
+});
 
   app.get('/test-recup', async (req, res) => {
     const folderPath = req.query.path || ''; // Récupère le chemin depuis la requête ou utilise une chaîne vide par défaut
