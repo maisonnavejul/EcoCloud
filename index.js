@@ -204,7 +204,83 @@ app.get('/list-files/:username', async (req, res) => {
     res.json(response);
   });
 });
+app.put('/rename-file', async (req, res) => {
+  // Log the request body to see incoming data
+  console.log("Requête reçue avec le corps :", req.body);
 
+  const { oldPath, newName } = req.body; // Extract oldPath and newName from the request body
+  if (!oldPath || !newName) {
+      console.log("Chemin ou nom nouveau manquant :", { oldPath, newName });
+      return res.status(400).send('Les paramètres "oldPath" et "newName" sont nécessaires.');
+  }
+
+  const userDirectory = path.dirname(oldPath); // Extrait le dossier utilisateur de l'ancien chemin
+  const fullOldPath = path.join(ROOT_DIR, oldPath); // Chemin complet vers l'ancien fichier
+  const fullNewPath = path.join(ROOT_DIR, userDirectory, newName); // Nouveau chemin complet avec le nom du dossier utilisateur
+
+  console.log('Tentative de renommage de :', fullOldPath, 'à', fullNewPath);
+
+  try {
+      // Vérifiez si le nouveau nom de fichier existe déjà dans ce dossier
+      if (await fs.pathExists(fullNewPath)) {
+          return res.status(409).send('Un fichier avec ce nom existe déjà dans ce dossier.');
+      }
+
+      // Renommez le fichier
+      await fs.move(fullOldPath, fullNewPath);
+      res.send({ message: 'Fichier renommé avec succès', newPath: path.join(userDirectory, newName) });
+  } catch (error) {
+      console.error('Erreur lors du renommage du fichier:', error);
+      res.status(500).send('Erreur lors du renommage du fichier');
+  }
+});
+
+// Fonction hypothétique pour mettre à jour le serveur SFTP (à implémenter selon votre contexte)
+async function updateSftpServer(oldPath, newPath) {
+  const client = new SftpClient();
+  try {
+      await client.connect({
+          host: "207.180.204.159",
+          port: 22,
+          username: "EcoCloud",
+          password: "EcoCloud"
+      });
+      await client.rename(oldPath, newPath);
+  } catch (error) {
+      console.error('Erreur lors de la mise à jour du serveur SFTP:', error);
+      throw error;
+  } finally {
+      client.end();
+  }
+}
+// app.post('/move-item', async (req, res) => {
+//   const { sourcePath, destinationPath } = req.body;
+//   const fullSourcePath = path.join(ROOT_DIR, sourcePath);
+//   const fullDestinationPath = path.join(ROOT_DIR, destinationPath);
+
+//   try {
+//       // Assurez-vous que le fichier ou le dossier source existe
+//       if (!await fs.exists(fullSourcePath)) {
+//           return res.status(404).send('Le fichier source n\'existe pas');
+//       }
+
+//       // Déplacer le fichier ou le dossier
+//       await fs.move(fullSourcePath, fullDestinationPath);
+//       res.send({ message: 'Fichier déplacé avec succès' });
+//   } catch (error) {
+//       console.error('Erreur lors du déplacement:', error);
+//       res.status(500).send('Erreur lors du déplacement');
+//   }
+// });
+app.post('/move-item', (req, res) => {
+  const { oldPath, newPath } = req.body;
+  fs.move(oldPath, newPath)
+    .then(() => res.json({ message: 'Successfully moved file.' }))
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to move file.' });
+    });
+});
 // Route pour gérer l'upload des fichiers
 app.post('/upload/:username', upload.single('file'), async (req, res) => {
   const username = req.params.username;
