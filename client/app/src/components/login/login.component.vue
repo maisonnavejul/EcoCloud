@@ -25,17 +25,7 @@
 </template>
 
 <script>
-const test_user = {
-    username: 'login',
-    psw: 'ecocloud'
-}
-
-const response = {
-    is_connected: true, 
-    message: 'Connexion réussie!', 
-    email: null, 
-    is_admin: 1
-}
+import { login as helper_login } from '../../assets/datasets/user.helper';
 
 export default {
     name: 'Login',
@@ -54,13 +44,8 @@ export default {
                 return;
             } 
 
-            if (this.username === test_user.username && this.password === test_user.psw) {
-                console.log('Login successful');
-                this.parse_res(response);
-            } else {
-                console.log('Login failed');
-                this.login_failed = true;
-            }
+            const user = helper_login(this.username, this.password)
+            this.parse_res(user);
         },
         async login() {
             // POST 10.222.7.145:3000/login
@@ -98,7 +83,7 @@ export default {
         },
 
         parse_res(res) {
-            if (!res.is_connected) {
+            if (!res.is_connected || !res) {
                 console.log('Login failed');
                 this.login_failed = true;
             } else {
@@ -137,18 +122,21 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    
+    height: fit-content;
+    width: fit-content;
+    padding : 50px 120px;
+
     font-size: 18px;
     font-weight:700;
-    height: 50%;
-    width: 35%;
     background-color: white;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
 }
 
 .login_title {
-    font-size: 25px;
-    margin-top: 5%;
-    margin-bottom: 4%;
+    font-size: 27px;
+    margin-bottom: 22px;
+    color: #1A281F;
 }
 
 .login_failed {
@@ -169,7 +157,6 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 15px;
     width: 80%;
     max-width: 200px;
     height: 100%;
@@ -177,11 +164,11 @@ export default {
 
 
 .login_form > * {
-    margin-bottom: 1%;
-    margin-bottom: 3%;
+    margin-bottom: 5px;
+    margin-bottom: 10px;
     width: 100%;
-    font-size: 15px;
-    height: 18%;
+    font-size: 17px;
+    height: 25px;
 }
 
 .login_form > input {
@@ -191,16 +178,16 @@ export default {
 }
 
 .login_form > input:focus {
-    border-bottom: 1.2px solid #335145;
+    border-bottom: 1px solid #51BD8F;
 }
 
 .login_form_button {
-    border: 0px;
-    border-radius: 5px;
-    background-color: #335145;
-    height: 18%;
-    width: 60%;
-    margin-top: 10%;
-    color: white;
+    margin-top: 22px;
+    width: 150px;
+    height: 30px;
+    background-color: #51BD8F;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
 }
 </style>

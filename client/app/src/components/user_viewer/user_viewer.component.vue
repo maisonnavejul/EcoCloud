@@ -1,16 +1,26 @@
 <template>
     <div class="user_viewer">
+        <div class="user_role">
+            <img src="../../assets/icons/user_icons/user.png" 
+                 class="user_icon" 
+                 title="User"
+                 v-if="is_admin == 0"/>
+            <img src="../../assets/icons/user_icons/admin.png" 
+                 class="user_icon" 
+                 title="Admin User"
+                 v-else/>
+        </div>
         <div class="user_viewer_content">
-            <div class="user_name" v-if="fullname">
-                <h2>{{ fullname? fullname: 'No Username' }}</h2>
+            <div class="user_infos">
+                <p>{{ username }}</p>
             </div>
             <div class="user_email">
                 <p>{{ email? email: 'No Email' }}</p>
             </div>
-            <div class="user_infos">
-                <p>{{ username }}</p>
-                <p>{{ is_admin ? 'Admin' : 'User' }}</p>
+            <div class="user_name" v-if="fullname">
+                <h2>{{ fullname? fullname: 'No Username' }}</h2>
             </div>
+            
         </div>
         <div class="user_actions">
             <img src="../../assets/icons/actions_icons/pencil.png" 
@@ -18,7 +28,8 @@
                  @click="edit_user"/>
             <img src="../../assets/icons/actions_icons/delete.png"
                  class="user_action_btn delete_button" 
-                 @click="delete_user"/>
+                 @click="delete_user"
+                 v-if="is_self"/>
         </div>
     </div>
 </template>
@@ -74,6 +85,10 @@ export default {
             }
             this.$router.push({path: '/register', params: props} );
         },
+
+        is_self() {
+            return this.$store.state.user.username == this.username;
+        }
     },
 
     mounted() {
@@ -100,22 +115,24 @@ export default {
     padding: 10px 15px;
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
 
-    width: 250px;
+    width: 350px;
     height: 50px;
-    border: 1px solid black;
     border-radius: 15px;
+
+    background-color: white;
 }
 
 .user_viewer_content {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 85%; 
+    width: 70%; 
 }
 
-.user_infos {
+.user_name {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -135,13 +152,13 @@ export default {
     margin-left: 10px;
 }
 
-.user_name {
+.user_infos {
     font-weight: 600;
     font-size: 1.1em;
     margin-bottom: 5px;
 }
 
-.user_email, .user_infos {
+.user_email, .user_name {
     font-size: 0.9em;
 }
 

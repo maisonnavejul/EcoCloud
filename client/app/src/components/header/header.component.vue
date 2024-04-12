@@ -6,7 +6,16 @@
             </div>
             <h1 class="header_title">EcoCloud</h1>
         </div>
-        <div class="header_account" v-if="this.is_logged_in">{{ user_account }}</div>
+        <div class="header_account_infos">
+            <h2 class="header_account" 
+                v-if="this.$store.state.is_logged_in"
+                @click="this.$router.push('/register')" >{{ this.$store.state.user.username }}</h2>
+            <img class="header_logout_btn"
+                 alt="logout button"
+                 src="../../assets/icons/tool_icons/logout.png"
+                 v-if="this.$store.state.is_logged_in"
+                 @click="logout"/>
+        </div>
     </header>
 </template>
 
@@ -16,18 +25,13 @@ export default {
     name: 'Header',
     data() {
         return {
-            user_account: null
         }
     },
 
     methods: {
-        is_logged_in() {
-            if (this.$store.state.is_logged_in) {
-                this.user_account = this.$store.state.user.emails;
-                return true;
-            } else {
-                return false;
-            }
+        logout() {
+            this.$store.dispatch('logout');
+            this.$router.push('/login');
         }
     },
 
@@ -43,6 +47,8 @@ export default {
     display: flex;
     flex-direction: row;
     margin-bottom: 2%;
+    justify-content: space-between;
+    height: 40px;
 }
 
 .header_left {
@@ -51,14 +57,40 @@ export default {
     align-items: center;
     justify-content: space-between;
     max-width: 15%;
+    margin-left: 7px;
 }
 
 .header_title {
-    font-size: 20px;
+    font-size: 22px;
 }
 
 .header_logo {
     font-size: 12px;
+    margin-right: 5px;
 }
 
+.header_account_infos {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 15%;
+    margin-right: 47px;
+}
+
+.header_account {
+    font-size: 18px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.header_logout_btn {
+    width: 22%;
+    height: 22px;
+    margin-right: 10px;
+    cursor: pointer;
+}
 </style>

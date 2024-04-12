@@ -126,12 +126,10 @@ export default {
 
 <style>
 .file_viewer_itm {
-    margin-bottom: 5%;
-    height:  38px;
+    height:  42px;
     width: 100%;
     transition: 0.3s;
 }
-
 
 .file_viewer_itm > * {
     vertical-align: middle;
@@ -156,7 +154,7 @@ export default {
 }
 
 .file_itm_checkbox input[type="checkbox"]:checked {
-    background-color: #335145;
+    background-color: #51BD8F;
 }
 
 .file_itm_checkbox input[type="checkbox"]:not(:checked) {

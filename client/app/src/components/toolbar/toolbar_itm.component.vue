@@ -43,13 +43,16 @@ export default {
 .toolbar_itm {
     height: 100%;
     width: 100%;
+
+    margin-right: 3px;
 }
 
 .toolbar_itm > button {
-    border-radius: 10px;
-    border: 1px solid #a9a9a9;
-    height: 26px;
+    height: 30px;
     width: 100px;
-    font-size: 14px;
+
+    border-radius: 15px;
+    border: 1px solid #a9a9a9;
+    font-size: 15px;
 }
 </style>

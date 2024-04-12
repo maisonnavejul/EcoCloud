@@ -1,11 +1,13 @@
 <template>
     <div class="toolbar">
         <div class="left_toolbar">
-            <ToolbarItem v-for="item in toolbar_items" 
-                            :name="item.name" 
-                            :callback="item.callback" 
-                            :class="item.class"
-                            :key="item.name"/>
+            <template v-for="item in toolbar_items">
+                <ToolbarItem :name="item.name" 
+                             :callback="item.callback" 
+                             :class="item.class"
+                             :key="item.name"
+                             v-if="!item.requires_selection || this.$store.state.checked_files.length > 0"/>
+            </template>
         </div>
         <div class="admin_toolbar">
             <ToolbarItem v-if="this.$store.getters.get_user_state.is_admin"
@@ -33,21 +35,25 @@ export default {
                     name: 'Upload',
                     callback: this.upload,
                     class: 'file_uploader_btn',
+                    requires_selection: false,
                 },
                 {
                     name: 'Download',
                     callback: this.download,
                     class: 'downloader',
+                    requires_selection: true,
                 },
                 {
                     name: 'Delete',
                     callback: this.delete,
                     class: '',
+                    requires_selection: true,
                 },
                 {
                     name: 'Refresh',
                     callback: this.refresh,
                     class: '',
+                    requires_selection: false,
                 },
             ],
             admin_items: [
@@ -55,6 +61,7 @@ export default {
                     name: 'Admin',
                     callback: this.go_admin,
                     class: '',
+                    requires_selection: false,
                 }
             ]
         }
@@ -108,7 +115,6 @@ export default {
 
 
 .file_uploader_btn {
-    background-color: #335145;
-    color: white; 
+    background-color: #51BD8F;
 }
 </style>

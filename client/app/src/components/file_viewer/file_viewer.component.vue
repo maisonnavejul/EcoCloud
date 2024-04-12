@@ -101,23 +101,23 @@ export default {
 
 
         handleCheck(file) {
-            this.checked_files.push(file);
-            console.log(this.checked_files);
+            this.$store.state.checked_files.push(file);
+            console.log(this.$store.state.checked_files);
         },
 
         handleUncheck(file) {
-            const tmp = this.checked_files
-            this.checked_files = [];
+            const tmp = this.$store.state.checked_files
+            this.$store.state.checked_files = [];
             tmp.forEach((f, index) => {
                 if (f.name !== file.name) {
-                    this.checked_files.push(f);
+                    this.$store.state.checked_files.push(f);
                 }
             });
-            console.log(this.checked_files);
+            console.log(this.$store.state.checked_files);
         },
 
         download_files() {
-            this.checked_files.forEach(file => {
+            this.$store.state.checked_files.forEach(file => {
                 const path = `${this.$store.state.cwd}/${file.name}`;
                 const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
                 try {
@@ -129,7 +129,7 @@ export default {
         },
 
         async delete_files() {
-            await this.checked_files.forEach(async file =>{
+            await this.$store.state.checked_files.forEach(async file =>{
                 const path = `${this.$store.state.cwd}/${file.name}`;
                 const response = await fetch('http://207.180.204.159:3000/delete-file', {
                 method: 'DELETE',
@@ -260,9 +260,9 @@ export default {
 
 .file_viewer > thead {
     text-align: left;
-    height: 40px;
+    height: 45px;
     padding: 10px 0; 
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .head_row:hover > .head_checkbox > input[type="checkbox"] {
@@ -277,6 +277,7 @@ export default {
     width: auto;
     font-weight: 600;
     border-bottom: 1px solid #d3d3d3;
+    color: #1A281F;
 }
 
 .head_checkbox {
@@ -298,10 +299,10 @@ th {
     vertical-align: middle;
 }
 
-
 tbody > .viewer_item:hover {
     background-color: #d3d3d3;
     border-radius: 15px;
+    cursor: pointer;
 }
 
 tbody > .viewer_item:not(:last-child) {
@@ -309,8 +310,13 @@ tbody > .viewer_item:not(:last-child) {
 }
 
 tbody > .viewer_item:last-child > * {
-    vertical-align: middle;
-    font-weight: 500;
     border-bottom: 1px solid white;
+}
+
+.no_file_viewer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: larger;
 }
 </style>

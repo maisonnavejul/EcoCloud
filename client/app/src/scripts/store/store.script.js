@@ -6,6 +6,7 @@ export default createStore({
         is_logged_in: false,
         user: null,
         cwd: '/',
+        checked_files: [],
     },
 
     getters: {

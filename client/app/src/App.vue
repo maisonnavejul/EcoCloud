@@ -38,7 +38,7 @@ html, #app, .ecocloud {
 body {
   padding: 0;
   margin: 0;
-  background-color: #f3f1f5;
+  background-color: #e3e0e6;
   color: #303030;
   font-family: -apple-system, BlinkMacSystemFont, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   width: 100%;
