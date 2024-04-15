@@ -9,6 +9,7 @@ const AdmZip = require('adm-zip');
 const { Console } = require('console');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
 const saltRounds = 10;
 
 const db = new sqlite3.Database('./database.db');
@@ -16,6 +17,7 @@ const db = new sqlite3.Database('./database.db');
 const BASE_DIR = path.resolve(__dirname, '..');
 const CHUNKS_DIR = path.join(BASE_DIR, 'EcoCloud', 'Chunks');
 const SFTPFILES_DIR = path.join(BASE_DIR, 'EcoCloud', 'SFTPfiles');
+URL_INVERS_TUNNELING="http://207.180.204.159:3000"
 
 // Configurer multer pour stocker les fragments de fichiers
 const upload = multer({ dest: CHUNKS_DIR });
@@ -53,6 +55,18 @@ async function checkAndDownloadNewFiles() {
   // Planifier la prochaine vérification des nouveaux fichiers dans 1 minute
   setTimeout(checkAndDownloadNewFiles, 1000); // 60000 millisecondes = 1 minute
 }
+// Fonction pour vérifier l'existence d'un fichier sur le serveur distant ralenti tout car il faut attendre la réponse
+async function isFileOnRemoteServer(fileName) {
+  try {
+      const response = await axios.get(`${URL_INVERS_TUNNELING}/check-file-existence`, { params: { fileName } });
+      return response.data.exists; // Supposons que l'API distante renvoie { exists: true/false }
+  } catch (error) {
+      console.error(`Erreur lors de la vérification de l'existence du fichier ${fileName} sur le serveur distant:`, error);
+      return false; // En cas d'erreur, supposons que le fichier n'existe pas
+  }
+}
+
+
 
 async function getFilesFromSFTP(remoteDirectoryPath, localDirectoryPath) {
   const client = new SftpClient();
@@ -120,11 +134,20 @@ const ROOT_DIR = path.join(__dirname, 'SFTPfiles'); // Chemin absolu vers le dos
 
 const getFileDetails = (filePath) => {
   const stats = fs.statSync(filePath);
-  return {
-      size: stats.size, // Taille en octets
-      createdAt: stats.birthtime // Date de création
-  };
+  if (stats.isDirectory()) {
+      const items = fs.readdirSync(filePath).length;  // Compter les items dans le dossier
+      return {
+          size: items,  // Utilisez 'size' pour représenter le nombre d'items
+          createdAt: stats.birthtime
+      };
+  } else {
+      return {
+          size: stats.size,  // Taille en octets pour les fichiers
+          createdAt: stats.birthtime
+      };
+  }
 };
+
 function ajouterUtilisateur({ email, psw, firstname, lastname, username, is_admin }, callback) {
   bcrypt.hash(psw, saltRounds, function(err, hash) {
     if (err) {
@@ -142,73 +165,78 @@ app.get('/list-files', async (req, res) => {
   const reqPath = req.query.path || '';
   const directoryPath = path.join(ROOT_DIR, reqPath);
 
-  fs.readdir(directoryPath, { withFileTypes: true }, (error, entries) => {
+  fs.readdir(directoryPath, { withFileTypes: true }, async (error, entries) => {
       if (error) {
           console.error('Erreur lors de la récupération des fichiers:', error);
           return res.status(500).send('Erreur lors de la récupération des fichiers');
       }
 
-      const response = entries.map(entry => {
+      const responses = await Promise.all(entries.map(async (entry) => {
           const entryPath = path.join(directoryPath, entry.name);
-          let { size, createdAt } = getFileDetails(entryPath);
-      
-      const isDirectory = fs.statSync(entryPath).isDirectory();
+          const { size, createdAt } = getFileDetails(entryPath);
+          const isDirectory = fs.statSync(entryPath).isDirectory();
+          const onRemoteServer = await isFileOnRemoteServer(entry.name);
+          console.log('dans le return',entry.name, isDirectory, size, createdAt, onRemoteServer)
 
-      size = isDirectory ? fs.readdirSync(entryPath).length : getFileDetails(entryPath).size;
-
-      return {
+          return {
               name: entry.name,
-              type: entry.isDirectory() ? 'Folder' : 'File',
-              size: size, // Taille du fichier
-              createdAt: createdAt // Date de création du fichier
-
-
+              type: isDirectory ? 'Folder' : 'File',
+              size: size,
+              createdAt: createdAt,
+              onRemoteServer: onRemoteServer
           };
-      });
+      }));
 
-      res.json(response);
+      res.json(responses);
   });
 });
+
+
 app.get('/list-files/:username', async (req, res) => {
-  const username = req.params.username;
-  const userDirectoryPath = path.join(ROOT_DIR, username); // Chemin absolu vers le dossier de l'utilisateur
+const username = req.params.username;
+const folderPath = req.query.path || ''; 
 
-  // Vérifier si le dossier de l'utilisateur existe, sinon le créer
-  if (!fs.existsSync(userDirectoryPath)) {
-    fs.mkdirSync(userDirectoryPath);
-    console.log(`Dossier de l'utilisateur ${username} créé.`);
-  }
+const userDirectoryPath = path.join(ROOT_DIR, username, folderPath);
+console.log(userDirectoryPath, username, folderPath);
 
-  fs.readdir(userDirectoryPath, { withFileTypes: true }, (error, entries) => {
-    if (error) {
+if (!fs.existsSync(userDirectoryPath)) {
+  fs.mkdirSync(userDirectoryPath, { recursive: true });
+  console.log(`Dossier de l'utilisateur ${username} créé.`);
+}
+
+fs.readdir(userDirectoryPath, { withFileTypes: true }, async (error, entries) => {
+  if (error) {
       console.error('Erreur lors de la récupération des fichiers:', error);
       return res.status(500).send('Erreur lors de la récupération des fichiers');
-    }
+  }
 
-    const response = entries.map(entry => {
+  const responses = await Promise.all(entries.map(async (entry) => {
       const entryPath = path.join(userDirectoryPath, entry.name);
-      let { size, createdAt } = getFileDetails(entryPath);
-      
+      const details = getFileDetails(entryPath);
       const isDirectory = fs.statSync(entryPath).isDirectory();
-
-      size = isDirectory ? fs.readdirSync(entryPath).length : getFileDetails(entryPath).size;
+      const onRemoteServer = await isFileOnRemoteServer(entry.name);
+      console.log('dans le return', entry.name, isDirectory, details.size, details.createdAt, onRemoteServer);
 
       return {
         name: entry.name,
-        type: entry.isDirectory() ? 'Folder' : 'File',
-        size: size, // Taille du fichier
-        createdAt: createdAt // Date de création du fichier
+        type: isDirectory ? 'Folder' : 'File',
+        size: details.size, // Nombre d'items si dossier, taille en octets si fichier
+        createdAt: details.createdAt,
+        onRemoteServer: onRemoteServer
       };
-    });
+  }));
 
-    res.json(response);
-  });
+  res.json(responses);
 });
-app.put('/rename-file', async (req, res) => {
+});
+
+app.put('/rename-file/:username', async (req, res) => {
   // Log the request body to see incoming data
   console.log("Requête reçue avec le corps :", req.body);
 
+
   const { oldPath, newName } = req.body; // Extract oldPath and newName from the request body
+  
   if (!oldPath || !newName) {
       console.log("Chemin ou nom nouveau manquant :", { oldPath, newName });
       return res.status(400).send('Les paramètres "oldPath" et "newName" sont nécessaires.');
@@ -216,7 +244,7 @@ app.put('/rename-file', async (req, res) => {
 
   const userDirectory = path.dirname(oldPath); // Extrait le dossier utilisateur de l'ancien chemin
   const fullOldPath = path.join(ROOT_DIR, oldPath); // Chemin complet vers l'ancien fichier
-  const fullNewPath = path.join(ROOT_DIR, userDirectory, newName); // Nouveau chemin complet avec le nom du dossier utilisateur
+  const fullNewPath = path.join(ROOT_DIR, userDirectory); // Nouveau chemin complet avec le nom du dossier utilisateur
 
   console.log('Tentative de renommage de :', fullOldPath, 'à', fullNewPath);
 
