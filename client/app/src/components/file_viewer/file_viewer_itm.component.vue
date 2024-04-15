@@ -23,7 +23,7 @@
         </td>
         <td class="file_itm_size">{{ size_transform() }}</td>
         <td class="file_itm_created_on">{{ format_date() }}</td>
-        <td class="file_itm_actions" @click="handle_click">
+        <td class="file_itm_actions" @click="handle_click" v-if="!this.$store.state.is_moving">
             <img class="itm_rename_action"
                  src="../../assets/icons/actions_icons/pencil.png"
                  alt="rename file"
