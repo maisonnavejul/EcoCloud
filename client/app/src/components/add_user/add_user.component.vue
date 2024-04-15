@@ -160,28 +160,21 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    width: fit-content;
+    height: fit-content;
+    padding: 50px 120px;
+
     font-size: 18px;
     font-weight: 700;
-    width: 35%;
-    height: 75%;
     background-color: white;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
 }
 
 .add_user_title {
-    font-size: 25px;
-    margin-top: 5%;
-    margin-bottom: 7%;
-}
-
-.add_user_form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 15px;
-    width: 80%;
-    max-width: 200px;
-    height: 100%;
+    font-size: 27px;
+    margin-bottom: 22px;
+    color: #1A281F;
 }
 
 .add_user_failed {
@@ -198,12 +191,21 @@ export default {
     margin-bottom: 4%;
 }
 
-.add_user_form > * {
-    margin-bottom: 1%;
-    margin-bottom: 3%;
+.add_user_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    font-size: 15px;
-    height: 10%;
+    max-width: 200px;
+    height: 100%;
+}
+
+.add_user_form > * {
+    margin-bottom: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+    font-size: 17px;
+    height: 25px;
 }
 
 .add_user_form > input {
@@ -213,16 +215,16 @@ export default {
 }
 
 .add_user_form > input:focus {
-    border-bottom: 1.2px solid #335145;
+    border-bottom: 1.2px solid #51BD8F;
 }
 
 .add_user_button {
-    border: 0px;
-    border-radius: 5px;
-    background-color: #335145;
-    height: 10%;
-    width: 60%;
-    margin-top: 10%;
-    color: white;
+    margin-top: 22px;
+    height: 30px;
+    width: 150px;
+    background-color: #51BD8F;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
 }
 </style>

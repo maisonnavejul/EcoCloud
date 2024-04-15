@@ -2,55 +2,73 @@
     {
         "name": "Grp2_6_fix_Path_traversal.patch",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 3248,
-        "createdAt": "2022-01-01T00:00:00"
+        "createdAt": "2022-01-01T00:00:00",
+        "onRemoteStorage": true
     },
     {
         "name": "Grp2_6_Path_traversal.pdf",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 12,
-        "createdAt": "2022-02-01T00:00:00"
+        "createdAt": "2022-02-01T00:00:00",
+        "onRemoteStorage": false
     },
     {
         "name": "GRP2_7_Faille_XSS.docx",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 1480673,
-        "createdAt": "2022-03-01T00:00:00"
+        "createdAt": "2022-03-01T00:00:00",
+        "onRemoteStorage": true
     },
     {
         "name": "Folder 1",
         "type": "folder",
+        "path": "../../../test_files/lab5/",
         "size": 12788,
-        "createdAt": "2022-04-01T00:00:00"
+        "createdAt": "2022-04-01T00:00:00",
+        "onRemoteStorage": true
     },
     {
         "name": "Folder 2",
         "type": "folder",
+        "path": "../../../test_files/lab5/",
         "size": 145,
-        "createdAt": "2022-05-01T00:00:00"
+        "createdAt": "2022-05-01T00:00:00",
+        "onRemoteStorage": false
     },
     {
         "name": "Grp2_6_fix_Path_traversal.zip",
         "type": "folder",
+        "path": "../../../test_files/lab5/",
         "size": 32,
-        "createdAt": "2022-01-01T00:00:00"
+        "createdAt": "2022-01-01T00:00:00",
+        "onRemoteStorage": false
     },
     {
         "name": "ecocloud.pptx",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 1053000,
-        "createdAt": "2022-01-01T00:00:00"
+        "createdAt": "2022-01-01T00:00:00",
+        "onRemoteStorage": true
     },
     {
         "name": "ecocloud_logo.svg",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 12398723,
-        "createdAt": "2024-04-06T13:45:57"
+        "createdAt": "2024-04-06T13:45:57",
+        "onRemoteStorage": false
     },
     {
         "name": "ecocloud_logo.png",
         "type": "file",
+        "path": "../../../test_files/lab5/",
         "size": 1239872,
-        "createdAt": "2024-04-06T13:46:37"
+        "createdAt": "2024-04-06T13:46:37",
+        "onRemoteStorage": false
     }
 ]

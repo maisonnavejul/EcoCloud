@@ -7,6 +7,7 @@ export default createStore({
         user: null,
         cwd: '/',
         checked_files: [],
+        previous_route: null,
     },
 
     getters: {
@@ -38,6 +39,9 @@ export default createStore({
         },
         GET_USER(state) {
             return this.getters.get_user_state;
+        },
+        SET_PREVIOUS_ROUTE(state, route) {
+            state.previous_route = route;
         }
 
     },

@@ -8,7 +8,19 @@
         <td class="file_itm_type">
             <img :src="get_icon()" alt="icon" />
         </td>
-        <td class="file_itm_name">{{ name }}</td>
+        <td class="file_itm_infos">
+            <img src="../../assets/icons/infos_icons/bookmark.png"
+                 alt="on-distant-storage"
+                 class="file_itm_storage_img"
+                 title="This file is saved in distant storage"
+                 v-if="this.$props.on_remote" />
+            <img src="../../assets/icons/infos_icons/bookmark-empty.png"
+                 alt="not-on-distant-storage"
+                 class="file_itm_storage_img"
+                 title="This file is not saved in distant storage"
+                 v-else />
+            <p class="file_itm_name">{{ name }}</p>
+        </td>
         <td class="file_itm_size">{{ size_transform() }}</td>
         <td class="file_itm_created_on">{{ format_date() }}</td>
         <td class="file_itm_actions" @click="handle_click">
@@ -52,6 +64,11 @@ export default {
         created_on: {
             type: String || Date,
             required: true
+        },
+        on_remote: {
+            type: Boolean,
+            required: false,
+            default: false,
         }
     },
 
@@ -124,8 +141,6 @@ export default {
             } else {
                 return get_file_icon(ext);
             }
-            const icon_name = this.is_folder(this.type) ? 'src/assets/icons/file_icons/folder.png' : 'src/assets/icons/file_icons/file.png';
-            return icon_name;
         },
 
         async rename_itm() {
@@ -216,4 +231,17 @@ export default {
     opacity: 0.8;
 }
 
+.file_itm_infos {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+}
+
+.file_itm_storage_img {
+    height: 18px;
+    width: 18px;
+    margin-right: 10px;
+    opacity: 0.6;
+}
 </style>

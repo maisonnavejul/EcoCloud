@@ -20,9 +20,12 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, _, next) => {
+router.beforeEach((to, from, next) => {
   if (!store.state.is_logged_in && to.path !== '/login') {
     next('/login');
+  } else if (from.name !== null){
+    store.commit('SET_PREVIOUS_ROUTE', from.path)
+    next();
   } else {
     next();
   }

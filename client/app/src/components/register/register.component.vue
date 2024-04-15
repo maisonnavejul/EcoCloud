@@ -131,7 +131,13 @@ export default {
         parse_res(data) {
             if (data.includes('mis à jour avec succès')) {
                 console.log('Registration successful');
-                this.$router.push('/');
+
+                if (this.$store.state.previous_route !== '/login') {
+                    this.$router.push(this.$store.state.previous_route);
+                }
+                else {
+                    this.$router.push('/');
+                }
             } else {
                 console.log('Registration failed');
             }

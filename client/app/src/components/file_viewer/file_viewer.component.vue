@@ -25,6 +25,7 @@
                                 :path="file.path" 
                                 :size="file.size"
                                 :created_on="file.createdAt"
+                                :on_remote="file.onRemoteStorage"
                                 :key="file.name"
                                 @navigate="handleNavigate"
                                 @check="handleCheck(file)"
