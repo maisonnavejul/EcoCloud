@@ -46,9 +46,9 @@ export default {
     display: flex;
     flex-direction: row;
     margin-bottom: 2%;
-    margin-top: 7px;
+    margin-top: 12px;
     justify-content: space-between;
-    height: 40px;
+    height: 50px;
 }
 
 .header_left {
@@ -67,8 +67,8 @@ export default {
 .header_logo {
     font-size: 12px;
     margin-right: 5px;
-    height: 70px;
-    width: 70px;
+    height: 100px;
+    width: 100px;
     display: flex;
     align-items: center;
     justify-self: center;
