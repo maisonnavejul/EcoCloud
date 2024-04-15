@@ -3,7 +3,9 @@
         <Toolbar @openFileUploaderModal="is_uploader_mod_open=true"
                  @download="handleDownload"
                  @delete="handleDelete"
-                 @refresh="handleRefresh"/>
+                 @refresh="handleRefresh"
+                 @move_here="handleMove"
+                 @cancel_move="handleCancel"/>
         <div class="home_viewer">
             <FileViewer ref="file_viewer" @refresh="handleRefresh"/>
         </div>
@@ -49,6 +51,17 @@ export default {
 
         async handleDelete() {
             await this.$refs.file_viewer.delete_files();
+        },
+
+        async handleMove() {
+            await this.$refs.file_viewer.move_files();
+            await this.handleRefresh();
+            await this.handleCancel();
+        },
+
+        handleCancel() {
+            this.$store.dispatch('set_moving', false);
+            this.$store.dispatch('set_moving_file', null);
         }
     },
 }

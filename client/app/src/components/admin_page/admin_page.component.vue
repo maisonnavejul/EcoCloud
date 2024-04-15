@@ -53,7 +53,6 @@ export default {
             const response = await fetch('http://207.180.204.159:8080/list-users');
 
             const data = await response.json();
-            console.log('Data: ', data);
 
             this.user_list = data;
         },

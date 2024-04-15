@@ -16,7 +16,6 @@ export const get_user_list = () => {
 
 export const login = (username, password) => {
     const user = user_dataset.find(user => user.username === username && user.password === password);
-    console.log('USER', user);
 
     if (!user) {
         return null;

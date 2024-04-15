@@ -19,7 +19,6 @@ export default {
             }
 
             const spt = cwd.split('/').slice(-2);
-            console.log('PATH_VIEWER: ', cwd, spt.length, spt)
 
             if (spt[1] === '') {
                 return [{ label: 'Home', path: '/' }];

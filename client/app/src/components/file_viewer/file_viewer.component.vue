@@ -62,8 +62,6 @@ export default {
 
     async created() {
         this.files = await this.get_files();
-        
-        console.log(this.files)
     },
 
     methods: {
@@ -81,21 +79,16 @@ export default {
 
             try {
                 const username = this.$store.getters.get_user_state.username;
-                console.log(username);
                 const path = this.$store.state.cwd;
-                console.log('PATH', path);
 
                 const req = new Request(`http://207.180.204.159:8080/list-files/${username}?path=${encodeURIComponent(path)}`) 
-                console.log('GET FILES REQ', req);
 
                 const response = await fetch(req);
-                console.log('GET FILES RESPONSE', response);
 
                 if (!response.ok) throw new Error("Error while fetching files")
                    
                 const json = await response.json();
                 const files = this.map_files(json);
-                console.log('MAPPED FILES', files);
 
                 return files;
 
@@ -148,6 +141,29 @@ export default {
             });
         },
 
+        async move_files() {
+            const old_path = `/${this.$store.state.user.username}${this.$store.state.moving_file.path}`;
+            let new_path = `/${this.$store.state.user.username}${this.$store.state.cwd}${this.$store.state.moving_file.name}`;
+            new_path = new_path.endsWith('/') ? new_path.substring(0, new_path.length - 1) : new_path;
+            const body = JSON.stringify({
+                oldPath: old_path,
+                newPath: new_path,
+            });
+
+            const req = new Request('http://207.180.204.159:8080/move-item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body
+            });
+            console.log('MOVE FILES BODY', body);
+            console.log('MOVE FILES REQ', req);
+
+            const res = await fetch(req);
+            console.log('MOVE FILES RES', res);
+        },
+
         async delete_files() {
             await this.$store.state.checked_files.forEach(async file =>{
                 const path = `${this.$store.state.cwd}/${file.name}`;
@@ -180,7 +196,6 @@ export default {
         },
 
         sort_by_name() {
-            console.log('sort by name');
             if (this.sort_order === 'asc') {
                 this.files.sort((a, b) => a.name.localeCompare(b.name));
                 this.sort_order = 'desc';
@@ -242,7 +257,6 @@ export default {
 
         sort_by_date() {
             if (this.sort_order === 'asc') {
-                console.log('asc');
                 this.files.sort((a, b) => {
                     const da = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt;
                     const db = typeof b.createdAt === 'string'? new Date(b.createdAt) : b.createdAt;
@@ -251,7 +265,6 @@ export default {
                 });
                 this.sort_order = 'desc';
             } else {
-                console.log('desc');
                 this.files.sort((a, b) => {
                     const da = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt;
                     const db = typeof b.createdAt === 'string' ? new Date(b.createdAt) : b.createdAt;
@@ -264,7 +277,6 @@ export default {
     },
 
     mounted() {
-        console.log('mounted');
         this.sort_by_name();
     }
 }

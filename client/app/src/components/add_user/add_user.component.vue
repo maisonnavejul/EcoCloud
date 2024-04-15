@@ -30,7 +30,13 @@
                     name="lastname"
                     placeholder="Last Name"
                     class="add_user_lastname"
-                    v-model="lastname"/>            
+                    v-model="lastname"/>
+                <div class="add_user_is_admin"></div>
+                <input type="checkbox"
+                    name="is_admin"
+                    v-model="is_admin"
+                    value="true"
+                    class="add_user_is_admin" />   
                 <button type="submit" 
                         name="button" 
                         class="add_user_button">{{button_text? button_text: 'Add User'}}</button>
@@ -63,6 +69,7 @@ export default {
             email: "",
             firstname: "",
             lastname: "",
+            is_admin: false,
             add_user_failed: false,
         }
     },
@@ -71,7 +78,6 @@ export default {
         offline_add_user() {
             if (this.check_form()) {
                 this.add_user_failed = true;
-                console.log('Please fill in password, username and email');
                 return;
             } 
 
@@ -82,7 +88,7 @@ export default {
                 this.email,
                 this.username,
                 this.password,
-                0,
+                this.is_admin? 1: 0,
             )
             this.parse_res(res);
         },
@@ -95,7 +101,6 @@ export default {
 
             if (this.check_form()) {
                 this.add_user_failed = true;
-                console.log('Please fill in password, username and email');
                 return;
             }
 
@@ -119,12 +124,10 @@ export default {
                 },
                 body: body,
             });
-            console.log('Request: ', req);
-            console.log('Body: ', body);
+            
             const response = await fetch(req);
             const data = await response.text();
             this.parse_res(data);
-            console.log('Data: ', data);
         },
 
         parse_res(response) {

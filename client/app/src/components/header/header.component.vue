@@ -32,15 +32,11 @@ export default {
     },
 
     methods: {
-        logout() {
-            this.$store.dispatch('logout');
-            this.$router.push('/login');
+        async logout() {
+            await this.$store.dispatch('logout');
+            await this.$router.push('/login');
         }
     },
-
-    mounted() {
-        console.log('Header.vue mounted');
-    }
 }
 </script>
 
@@ -60,7 +56,7 @@ export default {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    max-width: 15%;
+    width: fit-content;
     margin-left: 7px;
 }
 

@@ -145,8 +145,6 @@ export default {
       if (!this.resumable) {
         const port = this.is_save_checked? '3000' : '8080';
         const username = this.$store.getters.get_user_state.username;
-        console.log(port);
-        console.log(username);
         
         this.resumable = new Resumable({
           target: `http://207.180.204.159:${port}/upload/${username}`,
@@ -164,7 +162,6 @@ export default {
         });
 
         this.resumable.on('fileSuccess', (file) => {
-          console.log('Succès de téléversement pour', file.fileName || file.name);
           this.has_upload_started = false;
           this.status = "Téléversement terminé avec succès";
           console.log(`${this.calls}`);

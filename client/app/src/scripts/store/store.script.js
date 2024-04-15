@@ -8,6 +8,8 @@ export default createStore({
         cwd: '/',
         checked_files: [],
         previous_route: null,
+        is_moving: false,
+        moving_file: null,
     },
 
     getters: {
@@ -33,6 +35,11 @@ export default createStore({
         LOGOUT(state) {
             state.is_logged_in = false;
             state.user = null;
+            state.cwd = '/';
+            state.checked_files = [];
+            state.previous_route = null;
+            state.is_moving = false;
+            state.moving_file = null;
         },
         CHANGEDIR(state, new_path) {
             state.cwd = new_path;
@@ -42,6 +49,12 @@ export default createStore({
         },
         SET_PREVIOUS_ROUTE(state, route) {
             state.previous_route = route;
+        },
+        SET_MOVING(state, value) {
+            state.is_moving = value;
+        },
+        SET_FILE_MOVING(state, file) {
+            state.moving_file = file;
         }
 
     },
@@ -58,6 +71,12 @@ export default createStore({
         },
         get_user({ commit }) {
             commit('GET_USER');
+        },
+        set_moving({ commit }, value) {
+            commit('SET_MOVING', value);
+        },
+        set_moving_file({ commit }, file) {
+            commit('SET_FILE_MOVING', file);
         }
     },
 });

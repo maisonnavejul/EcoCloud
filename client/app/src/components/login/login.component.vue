@@ -40,7 +40,6 @@ export default {
     methods: {
         offline_login() {
             if (this.check_form()) {
-                console.log('Please fill in all fields');
                 return;
             } 
 
@@ -55,11 +54,9 @@ export default {
             }
 
             if (this.check_form()) {
-                console.log('Please fill in all fields');
                 return;
-            } 
-
-            console.log("login form submitted");
+            }
+            
             const body = JSON.stringify({
                     username: this.username,
                     psw: this.password
@@ -84,15 +81,12 @@ export default {
 
         parse_res(res) {
             if (!res.is_connected || !res) {
-                console.log('Login failed');
                 this.login_failed = true;
             } else {
                 this.login_failed = false;
-                console.log('RES', res);
                 this.$store.dispatch('login', res)
                     .then(() => {
                         const next_route = !res.email ? '/register' : '/';
-                        console.log('USER', this.$store.state.user);
                         this.$router.push(next_route);
                     })
                     .catch((error) => {
@@ -103,7 +97,7 @@ export default {
     },
 
     mounted() {
-        console.log('Login.vue mounted');
+        console.log('STATE', this.$store.state)
     }
 }
 </script>

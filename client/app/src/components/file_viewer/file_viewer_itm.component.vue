@@ -26,9 +26,14 @@
         <td class="file_itm_actions" @click="handle_click">
             <img class="itm_rename_action"
                  src="../../assets/icons/actions_icons/pencil.png"
-                 alt="rename"
+                 alt="rename file"
                  title="Rename File"
                  @click="rename_itm" />
+            <img class="itm_move_action"
+                 src="../../assets/icons/actions_icons/send.png"
+                 alt="move file"
+                 title="Move File" 
+                 @click="move_file" />
         </td>
     </tr>
 </template>
@@ -147,7 +152,7 @@ export default {
             const new_name = prompt('Enter new name: ');
             
             if (new_name != null) {
-                const old_path = `${this.$store.state.user.username}/${this.$props.path}`
+                const old_path = `/${this.$store.state.user.username}${this.$props.path}`
                 const body = JSON.stringify({
                     newName: new_name,
                     oldPath: old_path,
@@ -167,6 +172,15 @@ export default {
 
                 console.log('RES', res);
             }
+        },
+
+        move_file() {
+            if (this.$store.state.is_moving) {
+                return;   
+            }
+
+            this.$store.dispatch('set_moving', true);
+            this.$store.dispatch('set_moving_file', {name: this.name, path: this.path});
         }
     }
 }
@@ -227,6 +241,14 @@ export default {
 .itm_rename_action {
     width: 20px;
     height: 20px;
+    cursor: pointer;
+    opacity: 0.8;
+    margin-right: 7px;
+}
+
+.itm_move_action {
+    width: 25px;
+    height: 25px;
     cursor: pointer;
     opacity: 0.8;
 }
