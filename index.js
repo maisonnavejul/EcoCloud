@@ -215,7 +215,7 @@ fs.readdir(userDirectoryPath, { withFileTypes: true }, async (error, entries) =>
       const details = getFileDetails(entryPath);
       const isDirectory = fs.statSync(entryPath).isDirectory();
       const onRemoteServer = await isFileOnRemoteServer(entry.name);
-      console.log('dans le return', entry.name, isDirectory, details.size, details.createdAt, onRemoteServer);
+      //console.log('dans le return', entry.name, isDirectory, details.size, details.createdAt, onRemoteServer);
 
       return {
         name: entry.name,
@@ -230,7 +230,7 @@ fs.readdir(userDirectoryPath, { withFileTypes: true }, async (error, entries) =>
 });
 });
 
-app.put('/rename-file/:username', async (req, res) => {
+app.put('/rename-file', async (req, res) => {
   // Log the request body to see incoming data
   console.log("Requête reçue avec le corps :", req.body);
 
@@ -244,7 +244,7 @@ app.put('/rename-file/:username', async (req, res) => {
 
   const userDirectory = path.dirname(oldPath); // Extrait le dossier utilisateur de l'ancien chemin
   const fullOldPath = path.join(ROOT_DIR, oldPath); // Chemin complet vers l'ancien fichier
-  const fullNewPath = path.join(ROOT_DIR, userDirectory); // Nouveau chemin complet avec le nom du dossier utilisateur
+  const fullNewPath = path.join(ROOT_DIR, userDirectory, newName); // Nouveau chemin complet avec le nom du dossier utilisateur
 
   console.log('Tentative de renommage de :', fullOldPath, 'à', fullNewPath);
 
@@ -302,13 +302,26 @@ async function updateSftpServer(oldPath, newPath) {
 // });
 app.post('/move-item', (req, res) => {
   const { oldPath, newPath } = req.body;
-  fs.move(oldPath, newPath)
-    .then(() => res.json({ message: 'Successfully moved file.' }))
+  console.log('oldPath:', oldPath, 'newPath:', newPath);
+
+  const fullOldPath = path.join(ROOT_DIR, oldPath); // Chemin complet de l'ancien fichier
+  const fullNewPath = path.join(ROOT_DIR, newPath); // Chemin complet du nouveau fichier
+
+  console.log(fullNewPath);
+
+  // Vérifier si la destination est un dossier et non un fichier
+  if (fs.existsSync(fullNewPath) && fs.statSync(fullNewPath).isDirectory()) {
+    return res.status(400).send("Impossible de remplacer un répertoire par un fichier.");
+  }
+
+  fs.move(fullOldPath, fullNewPath)
+    .then(() => res.json({ message: 'Fichier déplacé avec succès.' }))
     .catch(err => {
       console.error(err);
-      res.status(500).json({ error: 'Failed to move file.' });
+      res.status(500).json({ error: 'Échec du déplacement du fichier.' });
     });
 });
+
 // Route pour gérer l'upload des fichiers
 app.post('/upload/:username', upload.single('file'), async (req, res) => {
   const username = req.params.username;
