@@ -310,7 +310,7 @@ progress::-webkit-progress-value {
   background-color: #fafafa;
   border: 1px solid #adb8c0;
   border-radius: 50%;
-  width: 10px;
+  width: 10px;  
   height: 10px;
   position: relative;
   outline: none;

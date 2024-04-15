@@ -7,36 +7,38 @@
             </div>
             <form class="add_user_form" @submit.prevent="add_user">
                 <input type="text" 
-                    name="username" 
-                    placeholder="Username" 
-                    class="add_user_username"
-                    v-model="username"/>
+                       name="username" 
+                       placeholder="Username" 
+                       class="add_user_username"
+                       v-model="username"/>
                 <input type="password" 
-                    name="password" 
-                    placeholder="Password" 
-                    class="add_user_username"
-                    v-model="password"/>
+                       name="password" 
+                       placeholder="Password" 
+                       class="add_user_username"
+                       v-model="password"/>
                 <input type="text"
-                    name="email"
-                    placeholder="youremail@example.com"
-                    class="add_user_email"
-                    v-model="email"/>
+                       name="email"
+                       placeholder="youremail@example.com"
+                       class="add_user_email"
+                       v-model="email"/>
                 <input type="text"
-                    name="firstname"
-                    placeholder="First Name"
-                    class="add_user_firstname"
-                    v-model="firstname"/>
+                       name="firstname"
+                       placeholder="First Name"
+                       class="add_user_firstname"
+                       v-model="firstname"/>
                 <input type="text"
-                    name="lastname"
-                    placeholder="Last Name"
-                    class="add_user_lastname"
-                    v-model="lastname"/>
-                <div class="add_user_is_admin"></div>
-                <input type="checkbox"
-                    name="is_admin"
-                    v-model="is_admin"
-                    value="true"
-                    class="add_user_is_admin" />   
+                       name="lastname"
+                       placeholder="Last Name"
+                       class="add_user_lastname"
+                       v-model="lastname"/>
+                <div class="add_user_is_admin">
+                    <input type="checkbox"
+                           name="is_admin"
+                           v-model="is_admin"
+                           value=false
+                           class="add_user_is_admin_check" />
+                    <p class="add_user_is_admin_label">Is Admin</p>
+                </div>   
                 <button type="submit" 
                         name="button" 
                         class="add_user_button">{{button_text? button_text: 'Add User'}}</button>
@@ -114,8 +116,10 @@ export default {
                 email: this.email,
                 firstname: this.firstname ? this.firstname : "",
                 lastname: this.lastname ? this.lastname : "",
-                is_admin: false,
+                is_admin: this.is_admin? 1: 0,
             });
+
+            console.log('BODY', body)
 
             const req = new Request('http://207.180.204.159:8080/addUser', {
                 method: 'POST',
@@ -219,6 +223,46 @@ export default {
 
 .add_user_form > input:focus {
     border-bottom: 1.2px solid #51BD8F;
+}
+
+.add_user_is_admin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.add_user_is_admin_check {
+    margin-right: 5px;
+    appearance: none;
+    background-color: #fafafa;
+    border: 1px solid #818486;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    outline: none;
+    cursor: pointer;
+    margin-right: 7px;
+}
+
+.add_user_is_admin_check:checked {
+    background-color: #51BD8F;
+}
+
+.add_user_is_admin_check:checked::after {
+    content: "✔";
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: white;
+}
+
+.add_user_is_admin_label {
+    color: #222323;
+    font-weight: 500;
 }
 
 .add_user_button {
