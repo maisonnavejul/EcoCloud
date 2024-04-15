@@ -1,20 +1,20 @@
-# Utiliser l'image officielle Node.js comme image de base
-FROM node:14
+# Étape 1 : Définir l'image de base
+FROM node:20.10.0
 
-# Définir le répertoire de travail dans le conteneur
+# Étape 2 : Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier les fichiers de package.json et package-lock.json
+# Étape 3 : Copier le fichier 'package.json' et 'package-lock.json' (si disponible)
 COPY package*.json ./
 
-# Installer les dépendances de l'application
+# Étape 4 : Installer les dépendances du projet
 RUN npm install
 
-# Copier les fichiers et dossiers restants dans le répertoire de travail (/app)
+# Étape 5 : Copier le reste des fichiers du projet dans le conteneur
 COPY . .
 
-# Exposer le port sur lequel l'application s'exécute
+# Étape 6 : Exposer le port sur lequel votre app tourne
 EXPOSE 3000
 
-# Commande pour démarrer l'application
+# Étape 7 : Définir la commande pour démarrer l'application
 CMD ["node", "index.js"]
