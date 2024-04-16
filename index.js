@@ -369,7 +369,7 @@ try {
 
     if (isComplete) {
         console.log(`Tous les fragments reçus pour ${resumableFilename}. Début du réassemblage.`);
-        await reassembleFile(tempDirPath, resumableTotalChunks, filePath, resumableFilename);
+        await reassembleFile(tempDirPath, resumableTotalChunks, filePath, resumableFilename,username,userDirectoryPath );
         console.log('Fichier réassemblé avec succès.');
         res.send({ message: 'Fichier téléversé et réassemblé avec succès' });
     } else {
@@ -386,7 +386,7 @@ const files = await fs.readdir(dirPath);
 return files.length === parseInt(totalChunks, 10);
 }
 
-async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename) {
+async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename,userDirectoryPath) {
   try {
     const writeStream = fs.createWriteStream(finalPath);
     for (let i = 1; i <= totalChunks; i++) {
@@ -401,13 +401,13 @@ async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename)
       // Le fichier est maintenant réassemblé. Prochaine étape: le dézipper
 
       // Déterminer le chemin final du dossier où les fichiers seront décompressés
-      const unzipDestination = path.join(userDirectoryPath, path.basename(originalFilename, '.zip'));
-
+      const unzipDestination = path.join(SFTPFILES_DIR,userDirectoryPath);
+      //console.log('unizp',unzipDestination)
       // Décompresser le fichier .zip
       if (path.extname(originalFilename).toLowerCase() === '.zip') {
       const zip = new AdmZip(finalPath);
       zip.extractAllTo(unzipDestination, true);
-      console.log(`Fichier ${originalFilename} décompressé avec succès dans ${unzipDestination}.`);
+      console.log(`Fichier ${originalFilename} décompressé avec succès dans ${unzipDestination} et userDirect ${userDirectoryPath} .`);
 
       // Optionnel: Supprimer le fichier .zip après la décompression si vous ne souhaitez pas le conserver
       await fs.unlink(finalPath);
@@ -457,7 +457,7 @@ try {
 
     if (isComplete) {
         console.log(`Tous les fragments reçus pour ${resumableFilename}. Début du réassemblage.`);
-        await reassembleFile(tempDirPath, resumableTotalChunks, filePath, resumableFilename);
+        await reassembleFile2(tempDirPath, resumableTotalChunks, filePath, resumableFilename);
         console.log('Fichier réassemblé avec succès.');
         res.send({ message: 'Fichier téléversé et réassemblé avec succès' });
     } else {
@@ -474,7 +474,7 @@ const files = await fs.readdir(dirPath);
 return files.length === parseInt(totalChunks, 10);
 }
 
-async function reassembleFile(dirPath, totalChunks, finalPath, originalFilename) {
+async function reassembleFile2(dirPath, totalChunks, finalPath, originalFilename) {
   try {
     const writeStream = fs.createWriteStream(finalPath);
     for (let i = 1; i <= totalChunks; i++) {

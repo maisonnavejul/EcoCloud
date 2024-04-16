@@ -1,5 +1,5 @@
-# Étape 1 : Définir l'image de base
-FROM node:20.10.0
+# Étape 1 : Définir l'image de basee
+FROM node:20-alpine
 
 # Étape 2 : Définir le répertoire de travail dans le conteneur
 WORKDIR /app
