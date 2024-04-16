@@ -131,24 +131,47 @@ export default {
 
         download_files() {
             let index = 0;
-            const windows = [];
             this.$store.state.checked_files.forEach(file => {
                 index += 1;
                 const username = this.$store.state.user.username;
                 const path = `${username}${this.$store.state.cwd}/${file.name}`;
-                const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
-                const win = window.open('', '_blank');
-                windows.push(win);
+                const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = file.name;
+                link.style.display = 'none';
+
+                document.body.appendChild(link);
+
+                link.click();
                 
-                setTimeout(() => {
-                    try {
-                        win.location = url;
-                    } catch (error) {
-                        console.log('Erreur lors du téléchargement des fichiers')
-                    }
-                }, index * 1000);
+                document.body.removeChild(link);
             });
         },
+
+
+        // TODO: Remove this method if new solution is working on real environment
+        // download_files() {
+        //     let index = 0;
+        //     const windows = [];
+        //     this.$store.state.checked_files.forEach(file => {
+        //         index += 1;
+        //         const username = this.$store.state.user.username;
+        //         const path = `${username}${this.$store.state.cwd}/${file.name}`;
+        //         const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
+        //         const win = window.open('', '_blank');
+        //         windows.push(win);
+                
+        //         setTimeout(() => {
+        //             try {
+        //                 win.location = url;
+        //             } catch (error) {
+        //                 console.log('Erreur lors du téléchargement des fichiers')
+        //             }
+        //         }, index * 1000);
+        //     });
+        // },
 
         async move_files() {
             const old_path = `/${this.$store.state.user.username}${this.$store.state.moving_file.path}`;
