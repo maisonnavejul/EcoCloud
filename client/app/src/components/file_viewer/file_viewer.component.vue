@@ -131,14 +131,18 @@ export default {
 
         download_files() {
             let index = 0;
+            const windows = [];
             this.$store.state.checked_files.forEach(file => {
                 index += 1;
                 const username = this.$store.state.user.username;
                 const path = `${username}${this.$store.state.cwd}/${file.name}`;
                 const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
+                const win = window.open('', '_blank');
+                windows.push(win);
+                
                 setTimeout(() => {
                     try {
-                        window.open(url, '_blank');
+                        win.location = url;
                     } catch (error) {
                         console.log('Erreur lors du téléchargement des fichiers')
                     }
