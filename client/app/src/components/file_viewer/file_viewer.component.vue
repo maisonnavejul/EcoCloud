@@ -130,14 +130,19 @@ export default {
         },
 
         download_files() {
+            let index = 0;
             this.$store.state.checked_files.forEach(file => {
-                const path = `${this.$store.state.cwd}/${file.name}`;
+                index += 1;
+                const username = this.$store.state.user.username;
+                const path = `${username}${this.$store.state.cwd}/${file.name}`;
                 const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`;
-                try {
-                    window.open(url, '_blank');
-                } catch (error) {
-                    console.log('Erreur lors du téléchargement des fichiers')
-                }
+                setTimeout(() => {
+                    try {
+                        window.open(url, '_blank');
+                    } catch (error) {
+                        console.log('Erreur lors du téléchargement des fichiers')
+                    }
+                }, index * 1000);
             });
         },
 

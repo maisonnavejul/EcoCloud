@@ -319,12 +319,12 @@ progress::-webkit-progress-value {
 }
 
 .file_saver_checkbox:checked {
-  background-color: #335145;
+  background-color: #51BD8F;
   border-color: #adb8c0;
 }
 
 .close_btn {
-  background-color: #335145;
+  background-color: #51BD8F;
   color: white;
   border: none;
   border-radius: 5px;
