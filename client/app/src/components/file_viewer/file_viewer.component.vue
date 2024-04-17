@@ -130,23 +130,29 @@ export default {
         },
 
         download_files() {
+            // For now you might want to enable this setting on chrome browser to dl multiple files
+            // chrome://flags/#allow-insecure-localhost
+            console.log(this.$store.state.checked_files);
             let index = 0;
             this.$store.state.checked_files.forEach(file => {
                 index += 1;
-                const username = this.$store.state.user.username;
-                const path = `${username}${this.$store.state.cwd}/${file.name}`;
-                const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`
+                const delay = index * 1000;
+                setTimeout(() => {
+                    const username = this.$store.state.user.username;
+                    const path = `${username}${this.$store.state.cwd}/${file.name}`;
+                    const url = `http://207.180.204.159:3000/download?path=${encodeURIComponent(path)}`
 
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = file.name;
-                link.style.display = 'none';
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = file.name;
+                    link.style.display = 'none';
 
-                document.body.appendChild(link);
+                    document.body.appendChild(link);
 
-                link.click();
-                
-                document.body.removeChild(link);
+                    link.click();
+                    
+                    document.body.removeChild(link);
+                }, delay);
             });
         },
 
