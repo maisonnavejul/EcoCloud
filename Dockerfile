@@ -1,20 +1,31 @@
-# Étape 1 : Définir l'image de basee
-FROM node:20-alpine
+# Start from the official Node.js Alpine image
+FROM node:alpine
 
-# Étape 2 : Définir le répertoire de travail dans le conteneur
-WORKDIR /app
+# Set the working directory in the Docker container
+WORKDIR /usr/src/app
 
-# Étape 3 : Copier le fichier 'package.json' et 'package-lock.json' (si disponible)
+# Install necessary system dependencies
+# python3 is added if you need it for any build scripts
+# make, g++, and libc6-compat are necessary for compiling native addons
+RUN apk update && \
+    apk add --no-cache python3 make g++ libc6-compat
+
+# Copy package.json and package-lock.json to leverage Docker caching
 COPY package*.json ./
 
-# Étape 4 : Installer les dépendances du projet
-RUN npm install
+# Install all dependencies in package.json, except for bcrypt and sqlite3
+# which will be handled separately
+RUN npm install --omit=optional --build-from-source
 
-# Étape 5 : Copier le reste des fichiers du projet dans le conteneur
+# Specifically handle sqlite3 and bcrypt installations from the GitHub tarball or by compiling
+RUN npm install https://github.com/tryghost/node-sqlite3/tarball/master --build-from-source && \
+    npm install bcrypt --build-from-source
+
+# Copy the rest of your application's source code from your local directory to the Docker container
 COPY . .
 
-# Étape 6 : Exposer le port sur lequel votre app tourne
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Étape 7 : Définir la commande pour démarrer l'application
+# Command to run your app using Node.js
 CMD ["node", "index.js"]
