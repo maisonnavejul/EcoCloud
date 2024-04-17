@@ -5,7 +5,7 @@
         <!-- Bouton pour envoyer des fichiers -->
         <div class="file_selector">
           <button class="btn_selector"
-                  @click="trigger_file_upload">Select. fichiers</button>
+                  @click="trigger_file_upload">Select files</button>
           <input type="file" 
                  id="fileUpload" 
                  class="file_input" 
@@ -18,7 +18,7 @@
         <!-- Bouton pour envoyer des dossiers -->
         <div class="folder_selector">
           <button class="btn_selector" 
-                  @click="trigger_folder_upload">Select. dossiers</button>
+                  @click="trigger_folder_upload">Select folders</button>
           <input type="file" 
                  id="folderUpload" 
                  class="file_input" 
@@ -41,11 +41,14 @@
         <div class="progress_toolbar">
           <img src="../../assets/icons/tool_icons/video.png" 
                @click="pauseUpload" 
+               alt="pause upload"
                :class="{ 'enabled_img': !is_paused, 'disabled-img': is_paused }" />
           <img src="../../assets/icons/tool_icons/play-button.png" 
-               @click="resumeUpload" 
+               @click="resumeUpload"
+               alt="resume upload" 
                :class="{ 'enabled_img': is_paused, 'disabled-img': !is_paused }">
           <img src="../../assets/icons/tool_icons/close.png"
+               alt="cancel upload"
                @click="cancelUpload" />
         </div>
       </div>
@@ -56,7 +59,7 @@
          @click="this.change_save_check" 
          v-if="!status" >
       <input type="checkbox" class="file_saver_checkbox" v-model="is_save_checked" />
-      <p>Sauvegarder le fichier</p>
+      <p>Save the file on distant server</p>
       <Tooltip :content="tooltip_content"/>
     </div>
     
@@ -88,7 +91,7 @@ export default {
       resumable: null,
       zip: new JSZip(),
       progress: 0,
-      tooltip_content: "Cette option permet de sauvergarder le fichier envoyé sur le serveur distant en plus de votre espace cloud. Cette option vous permet de récupérer vos fichiers en cas de panne du serveur EcoCloud. Utilisez cette option pour vos fichiers importants.",
+      tooltip_content: "This option allows you as a user to save this file on the distant server. The aim is to store it distantly in case there is a problem on your EcoCloud server. This option might be checked only for important file since the space on the distant server is limited.",
     };
   },
   

@@ -3,7 +3,7 @@
         <div class="register">
             <h2 class="register_title">Welcome</h2>
             <div class="register_failed" v-if="register_failed">
-                <p>Une information d'enregistrement est incorrecte</p>
+                <p>One registration information is missing, please enter at least a username, email and password</p>
             </div>
             <form class="register_form" @submit.prevent="register">
                 <input type="text" 

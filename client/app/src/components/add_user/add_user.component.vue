@@ -3,7 +3,7 @@
         <div class="add_user">
             <h2 class="add_user_title">Add a new user</h2>
             <div class="add_user_failed" v-if="add_user_failed">
-                <p>Une information d'enregistrement est incorrecte</p>
+                <p>An information is incorrect. You might be giving an email, username and a mail</p>
             </div>
             <form class="add_user_form" @submit.prevent="add_user">
                 <input type="text" 

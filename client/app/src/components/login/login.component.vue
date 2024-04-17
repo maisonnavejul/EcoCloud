@@ -3,7 +3,7 @@
         <div class="login">
             <h2 class="login_title">Welcome Back !</h2>
             <div class="login_failed" v-if="login_failed">
-                <p>Une information de connexion est incorrecte</p>
+                <p>Username or login is incorrect</p>
             </div>
             <form class="login_form" @submit.prevent="login">
                 <input type="text" 
