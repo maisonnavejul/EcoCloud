@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "firstname": "John",
+        "lastname": "Doe",
+        "email": "john.doe@example.com",
+        "is_admin": 0,
+        "username": "jdoe",
+        "password": "password"
+    },
+    {
+        "id": 2,
+        "firstname": "",
+        "lastname": "",
+        "email": "",
+        "is_admin": 1,
+        "username": "login",
+        "password": "ecocloud"
+    },
+    {
+        "id": 3,
+        "firstname": "Jane",
+        "lastname": "Doe",
+        "email": "jane.doe@example.com",
+        "is_admin": 0,
+        "username": "jadoe",
+        "password": "password2"
+    },
+    {
+        "id": 4,
+        "firstname": "Bob",
+        "lastname": "Smith",
+        "email": "bob.smith@example.com",
+        "is_admin": 0,
+        "username": "bsmith",
+        "password": "password3"
+    },
+    {
+        "id": 5,
+        "firstname": "Alice",
+        "lastname": "Johnson",
+        "email": "alice.johnson@example.com",
+        "is_admin": 0,
+        "username": "ajohnson",
+        "password": "password4"
+    },
+    {
+        "id": 6,
+        "firstname": "Charlie",
+        "lastname": "Brown",
+        "email": "charlie.brown@example.com",
+        "is_admin": 0,
+        "username": "cbrown",
+        "password": "password5"
+    }
+]
